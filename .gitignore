@@ -1,0 +1,5 @@
+/app/cache/
+/vendor/
+.idea/
+/source/components/
+/public/css/

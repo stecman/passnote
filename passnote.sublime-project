@@ -1,0 +1,22 @@
+{
+	"folders":
+	[
+		{
+			"follow_symlinks": true,
+			"path": "source"
+		},
+		{
+			"follow_symlinks": true,
+			"path": "app/views"
+		}
+	],
+
+	"build_systems":
+	[
+		{
+			"name": "Make",
+			"working_dir": "${project_path}/source",
+			"cmd": ["make"]
+		}
+	]
+}

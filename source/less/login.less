@@ -1,0 +1,52 @@
+&{
+
+.lgn {
+	margin: auto;
+	max-width: 300px;
+
+	.lgn-symbol {
+		display: block;
+		margin: 3em auto 2em;
+		width: 100px;
+	}
+
+	form {
+		padding: 10px;
+	}
+
+	input {
+		position: relative;
+		width: 100%;
+		padding: 10px;
+		font-size: 16px;
+		margin-bottom: -2px;
+
+		&:focus {
+			z-index: 2;
+		}
+
+		&[type="submit"] {
+			margin-top: 10px;
+		}
+	}
+
+	.alert {
+		margin-top: 0;
+	}
+
+	@media @small-narrow {
+		.lgn-symbol {
+			width: auto;
+			max-width: 100%;
+			padding: 0 20%;
+		}
+
+		form {
+			input {
+				padding: 12px 10px;
+			}
+		}
+	}
+}
+
+}

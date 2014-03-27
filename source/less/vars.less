@@ -1,0 +1,41 @@
+@font-family-base: sans-serif;
+@input-border: #333;
+@input-height-small: 14px;
+@padding-base-horizontal: 10px;
+@font-size-base: 14px;
+@line-height-base: 1.4em;
+@input-color: #444;
+@close-font-weight: normal;
+@close-text-shadow: #999;
+@close-color: #333;
+
+@logo-yellow: #FFD900;
+@logo-blue: #53a9ff;
+@logo-orange: #ff7606;
+@logo-green: #a5cc0a;
+@primary: #0080FF;
+@secondary: @primary;
+@tertiary: @primary;
+@primary-desaturated: desaturate(@primary, 70%);
+@secondary-desaturated: desaturate(@secondary, 80%);
+@transparent: fade(#000, 0%);
+
+@secondary-bg: lighten(@secondary-desaturated, 45%);
+@secondary-bg-light: lighten(@secondary-desaturated, 47%);
+@secondary-bg-lighter: #fff;
+@secondary-color: @primary-desaturated;
+@secondary-color-dark: darken(@secondary-color, 12.5%);
+@secondary-color-darker: darken(@secondary-color, 25%);
+@secondary-color-darkest: darken(@secondary-color, 37.5%);
+@secondary-border-color: lighten(@primary-desaturated, 40%);
+@secondary-border-color-light: lighten(@primary-desaturated, 44%);
+@secondary-border-color-lighter: lighten(@primary-desaturated, 46%);
+
+@code-color: @secondary-color-darkest;
+@code-bg: fade(@secondary-desaturated, 7.5%);
+
+@tertiary-bg: #fff;
+@tertiary-color-light: fade(@tertiary-color, 60%);
+@tertiary-color: darken(@secondary-desaturated, 7.5%);
+@tertiary-color-dark: darken(@tertiary-color, 15%);
+@tertiary-color-darker: darken(@tertiary-color, 30%);

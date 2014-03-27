@@ -1,0 +1,22 @@
+{
+  "name": "passnote",
+  "version": "0.0.0",
+  "authors": [
+    "Stephen Holdaway <stecman@gmail.com>"
+  ],
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "ace": "~1.1.1",
+    "bootstrap": "~3.1.0",
+    "less-helpers": "ssh://stecman.ath.cx/git/heyday/less-helpers.git#~0.3.0"
+  }
+}
