@@ -3,3 +3,5 @@
 .idea/
 /source/components/
 /public/css/
+
+*.sublime-workspace
