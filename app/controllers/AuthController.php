@@ -69,6 +69,9 @@ class AuthController extends ControllerBase
             ]
         ]);
 
+        // Sleep for 1-500ms
+        usleep(mt_rand(1000, 500000));
+
         if ($user && $this->security->checkHash($data['password'], $user->password)) {
 
             // Validate TOTP token
@@ -77,7 +80,7 @@ class AuthController extends ControllerBase
             if ($otpKey = $user->getOtpKey($data['password'])) {
                 $otp = new \Rych\OTP\TOTP($otpKey);
                 if (!$otp->validate($data['token'])) {
-                    $this->flash->error('Invalid token.');
+                    $this->flash->error('Incorrect login details');
                     return false;
                 };
             }
@@ -88,7 +91,7 @@ class AuthController extends ControllerBase
         } else {
             // Keep timing
             $this->security->hash(openssl_random_pseudo_bytes(12));
-            $this->flash->error('Incorrect username or password.');
+            $this->flash->error('Incorrect login details');
         }
     }
 
