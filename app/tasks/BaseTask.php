@@ -1,0 +1,40 @@
+<?php
+
+
+abstract class BaseTask extends \Phalcon\CLI\Task
+{
+    /**
+     * Prompt user for input through STDIN
+     */
+    protected function promptInput($prompt, $hideInput = false)
+    {
+        fwrite(STDIN, $prompt);
+        $options = $hideInput ? '-s' : '';
+        $value = trim(`bash -c 'read $options uservalue && echo \$uservalue'`);
+        fwrite(STDIN, "\n");
+
+        return trim($value);
+    }
+
+    protected function dumpMessages(array $messages)
+    {
+        $out = '';
+
+        /** @var \Phalcon\Mvc\Model\Message $message */
+        foreach ($messages as $message) {
+            $className = get_class($message->getModel());
+
+            $out .= <<<"EOD"
+
+Error: {$message->getMessage()}
+Type: {$message->getType()}
+Model: {$className}
+Field: {$message->getField()}
+
+EOD;
+        }
+
+        return $out;
+
+    }
+}

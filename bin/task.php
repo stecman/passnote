@@ -1,53 +1,9 @@
 #!/usr/bin/env php
 <?php
 
-use Phalcon\DI\FactoryDefault\CLI as CliDI,
-    Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
+use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
 
-if (PHP_SAPI !== 'cli') die('This script is for CLI use only');
-
-defined('APPLICATION_PATH') || define('APPLICATION_PATH', realpath(dirname(__DIR__)).'/app');
-
-// Error handling
-error_reporting(E_ALL);
-
-// Autoloading
-if (file_exists($autoload = __DIR__ . '/../vendor/autoload.php')) {
-    require_once $autoload;
-    unset($autoload);
-} else {
-    die("Composer vendors are not installed. Run `composer install`\n");
-}
-
-$whoops = new Whoops\Run();
-$whoops->pushHandler(new Whoops\Handler\CallbackHandler(function(\Exception $e){
-    echo "Error: ", $e->getMessage(), "\n\n", $e->getTraceAsString(), "\n";
-    exit(1);
-}));
-$whoops->register();
-
-// DI
-$di = new CliDI();
-
-// Load the configuration file (if any)
-if(is_readable(APPLICATION_PATH . '/config/config.php')) {
-    $config = include APPLICATION_PATH . '/config/config.php';
-    $di->set('config', $config);
-}
-
-// Load the loader
-if(is_readable(APPLICATION_PATH . '/config/loader.php')) {
-    include APPLICATION_PATH . '/config/loader.php';
-
-    $loader->registerDirs(
-        array_merge(
-            $loader->getDirs(),
-            [APPLICATION_PATH . '/tasks']
-        )
-    );
-
-    $loader->register();
-}
+require __DIR__ . '/../app/config/cli-bootstrap.php';
 
 $di->set('db', function () use ($config) {
     return new DbAdapter(array(
@@ -100,6 +56,12 @@ function printHelp() {
 
     foreach (getSubclassesOf('\Phalcon\CLI\Task') as $className) {
         $class = new ReflectionClass($className);
+
+        if ($class->isAbstract()) {
+            // Skip abstract classes
+            continue;
+        }
+
         echo "  ".strtolower(preg_replace('/Task$/', '', $class->getName())).":\n";
 
         /** @var ReflectionMethod $method */

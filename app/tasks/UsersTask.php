@@ -2,7 +2,7 @@
 
 use \Rych\OTP\Seed;
 
-class UsersTask extends \Phalcon\CLI\Task
+class UsersTask extends BaseTask
 {
     /**
      * Create a new user
@@ -16,22 +16,25 @@ class UsersTask extends \Phalcon\CLI\Task
         }
 
         echo "Creating user '$email'\n";
-        $password = $this->promptPassword();
-
-        if ($this->promptInput('Confirm password:', true) !== $password) {
-            die("Passwords didn't match\n");
-        }
+        $password = $this->promptCreatePassword();
 
         $user = new User();
         $user->email = $email;
         $user->password = $this->security->hash($password);
 
-        if ($user->save()) {
-            echo "Created user $email with id {$user->id}\n";
-        } else {
-            print_r($user->getMessages());
-            exit(1);
-        }
+        $key = Key::generate( $user->setupDefaultKeyPassphrase($password) );
+        $key->setName('Account key');
+
+        // Save user and key
+        $this->db->begin();
+        $user->keys = [$key];
+        $user->create();
+
+        $user->defaultKey = $key;
+        $user->update();
+        $this->db->commit();
+
+        echo "Created user $email with id {$user->id}\n";
     }
 
     /**
@@ -52,8 +55,8 @@ class UsersTask extends \Phalcon\CLI\Task
         if ($user) {
             $password = $this->promptInput('User\'s password:', true);
 
-            if (!$this->security->checkHash($password, $user->password)) {
-                die("Incorrect password.\n");
+            if (!$user->validatePassword( $oldPassword = $this->promptInput('Current password:', true) )) {
+                die("Password incorrect\n");
             }
 
             $otp = Seed::generate(40);
@@ -67,7 +70,7 @@ class UsersTask extends \Phalcon\CLI\Task
             );
 
             echo "$uri";
-            fwrite(STDERR, "OTP updated: $uri\n");
+            fwrite(STDIN, "OTP updated\n");
         } else {
             die("No user found for $email\n");
         }
@@ -100,15 +103,12 @@ class UsersTask extends \Phalcon\CLI\Task
         ]);
 
         if ($user) {
-            if (!$this->security->checkHash(
-                $this->promptInput('Current password:', true),
-                $user->password
-            )) {
+            if (!$user->isCorrectPassword( $oldPassword = $this->promptInput('Current password:', true) )) {
                 die("Password incorrect\n");
             }
 
-            $newPassword = $this->promptPassword(true);
-            $user->password = $this->security->hash($newPassword);
+            $newPassword = $this->promptCreatePassword(true);
+
             $user->save();
 
             echo "Password updated.\n";
@@ -123,10 +123,14 @@ class UsersTask extends \Phalcon\CLI\Task
      * @param bool $new - ask for 'new password' instead of 'password'
      * @return string
      */
-    protected function promptPassword($new = false)
+    protected function promptCreatePassword($new = false)
     {
         $new = $new ? 'New ' : '';
         $password = $this->promptInput($new.'Password:', true);
+
+        if ($password === '') {
+            die("Password cannot be blank\n");
+        }
 
         if ($this->promptInput('Confirm password:', true) !== $password) {
             die("Passwords didn't match\n");
@@ -138,19 +142,6 @@ class UsersTask extends \Phalcon\CLI\Task
     protected function isValidEmail($email)
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL);
-    }
-
-    /**
-     * Prompt user for input through STDIN
-     */
-    protected function promptInput($prompt, $hideInput = false)
-    {
-        fwrite(STDERR, $prompt);
-        $options = $hideInput ? '-s' : '';
-        $value = trim(`bash -c 'read $options uservalue && echo \$uservalue'`);
-        fwrite(STDERR, "\n");
-
-        return trim($value);
     }
 
 }
