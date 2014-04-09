@@ -72,7 +72,7 @@ class AuthController extends ControllerBase
         // Sleep for 1-500ms
         usleep(mt_rand(1000, 500000));
 
-        if ($user && $this->security->checkHash($data['password'], $user->password)) {
+        if ($user && $user->validatePassword($data['password'])) {
 
             // Validate TOTP token
             // This needs to be done at this stage as the two factor auth key is
@@ -85,9 +85,8 @@ class AuthController extends ControllerBase
                 };
             }
 
-            $this->session->set(Security::SESSION_USER, $user);
-            header('Location: /');
-            die();
+            $this->session->set(Security::SESSION_USER_ID, $user->id);
+            $this->response->redirect('');
         } else {
             // Keep timing
             $this->security->hash(openssl_random_pseudo_bytes(12));

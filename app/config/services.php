@@ -33,7 +33,9 @@ $di->set('raven', function() use ($config) {
  */
 
 if (DEV_MODE) {
-    new \Whoops\Provider\Phalcon\WhoopsServiceProvider($di);
+    ini_set('display_errors', true);
+    ini_set('html_errors', true);
+//    new \Whoops\Provider\Phalcon\WhoopsServiceProvider($di);
 } else {
     ini_set('display_errors', false);
     ini_set('html_errors', false);
@@ -106,8 +108,6 @@ $di->set('modelsMetadata', function () {
 
 $di->set('session', function () {
     $session = new SessionAdapter();
-    $session->start();
-
     return $session;
 });
 

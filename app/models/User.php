@@ -80,4 +80,9 @@ class User extends \Phalcon\Mvc\Model
         }
     }
 
+    public function validatePassword($tryPassword)
+    {
+        $security = new \Phalcon\Security();
+        return $security->checkHash($tryPassword, $this->password);
+    }
 }
