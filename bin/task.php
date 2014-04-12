@@ -66,6 +66,12 @@ function printHelp() {
 
         /** @var ReflectionMethod $method */
         foreach (filterMethods($class->getMethods(ReflectionMethod::IS_PUBLIC)) as $method) {
+
+            // Skip public methods that aren't actions
+            if (!preg_match('/Action$/', $method->getName())) {
+                continue;
+            }
+
             $name = str_replace('_', '-', $method->getName());
             echo "    ".strtolower(preg_replace('/(Action$)/', '', $name));
 
