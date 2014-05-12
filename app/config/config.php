@@ -1,6 +1,6 @@
 <?php
 
-return new \Phalcon\Config([
+$config = [
     'database' => [
         'adapter'     => 'Mysql',
         'host'        => 'localhost',
@@ -21,4 +21,22 @@ return new \Phalcon\Config([
     'logging' => [
         'ravenUrl' => ''
     ]
-]);
+];
+
+
+// Merge in any environment specific config
+$envFile = __DIR__ . '/../../config.php';
+if (file_exists($envFile)) {
+    $environmentConfig = require $envFile;
+
+    if (is_array($environmentConfig)) {
+        $config = array_replace_recursive($config, $environmentConfig);
+    }
+}
+
+// If dev mode wasn't enabled in the environment config, assume it should be off
+if (!defined('DEV_MODE')) {
+    define('DEV_MODE', false);
+}
+
+return new \Phalcon\Config($config);

@@ -1,13 +1,6 @@
 <?php
 
-error_reporting(E_ALL);
-
 try {
-
-    define('DEV_MODE', true);
-
-    ini_set('session.hash_function', 'sha512');
-    session_start();
 
     /**
      * Use composer autoloader
