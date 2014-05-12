@@ -4,3 +4,4 @@
 /source/components/
 /public/css/
 *.sublime-workspace
+.module-cache/

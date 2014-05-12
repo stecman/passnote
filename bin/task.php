@@ -97,7 +97,7 @@ $class = new ReflectionClass(\Phalcon\Text::camelize(CURRENT_TASK.'_task'));
 if ($class->hasMethod(CURRENT_ACTION.'Action')) {
     $method = $class->getMethod(CURRENT_ACTION.'Action');
 
-    if ($method->isPublic()) {
+    if ($method->isPublic() && preg_match('/Action$/', $method->getName())) {
         $args = array_slice($argv, 3);
         if ($method->getNumberOfRequiredParameters() > count($args)) {
             echo "Missing required parameters.\n";

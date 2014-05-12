@@ -1,0 +1,63 @@
+// Object list
+.obj-list {
+	> * {
+		position: relative;
+		display: block;
+		padding: 10px;
+		margin-left: -10px;
+		border-bottom: 1px solid #eee;
+		text-align: left;
+		text-decoration: none;
+
+		&:hover {
+			.title {
+				text-decoration: underline;
+			}
+		}
+
+		> * {
+			margin: 0;
+		}
+	}
+
+	.title {
+		font-size: 14px;
+		line-height: 1.4em;
+		color: #444;
+	}
+
+	.meta {
+		font-size: 12px;
+		line-height: 1.3em;
+		color: #777;
+	}
+
+	.date {
+		position: absolute;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		margin: auto;
+		color: #999;
+		font-size: 11px;
+		height: 1em;
+	}
+
+	:hover .date {
+		color: #555;
+	}
+
+	@media @xs {
+		padding: 0;
+		
+		> * {
+			margin: 0;
+		}
+
+		.date {
+			position: relative;
+			display: block;
+			margin: 0.1em 0 0.4em;
+		}
+	}
+}

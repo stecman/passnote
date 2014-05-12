@@ -2,9 +2,50 @@
 
 &{
 
-@import (multiple) "vars.less";
+@font-family-base: sans-serif;
+@input-border: #333;
+@input-height-small: 14px;
+@padding-base-horizontal: 10px;
+@font-size-base: 14px;
+@line-height-base: 1.4em;
+@input-color: #444;
+@close-font-weight: normal;
+@close-text-shadow: #999;
+@close-color: #333;
+
+@logo-yellow: #FFD900;
+@logo-blue: #53a9ff;
+@logo-orange: #ff7606;
+@logo-green: #a5cc0a;
+@primary: #333;
+@secondary: @primary;
+@tertiary: @primary;
+@primary-desaturated: desaturate(@primary, 70%);
+@secondary-desaturated: desaturate(@secondary, 80%);
+@transparent: fade(#000, 0%);
+
+@secondary-bg: lighten(@secondary-desaturated, 45%);
+@secondary-bg-light: lighten(@secondary-desaturated, 47%);
+@secondary-bg-lighter: #fff;
+@secondary-color: @primary-desaturated;
+@secondary-color-dark: darken(@secondary-color, 12.5%);
+@secondary-color-darker: darken(@secondary-color, 25%);
+@secondary-color-darkest: darken(@secondary-color, 37.5%);
+@secondary-border-color: lighten(@primary-desaturated, 40%);
+@secondary-border-color-light: lighten(@primary-desaturated, 44%);
+@secondary-border-color-lighter: lighten(@primary-desaturated, 46%);
+
+@code-color: @secondary-color-darkest;
+@code-bg: fade(@secondary-desaturated, 7.5%);
+
+@tertiary-bg: #fff;
+@tertiary-color-light: fade(@tertiary-color, 60%);
+@tertiary-color: darken(@secondary-desaturated, 7.5%);
+@tertiary-color-dark: darken(@tertiary-color, 15%);
+@tertiary-color-darker: darken(@tertiary-color, 30%);
 
 .ace_editor {
+	font-size: 13px;
 	color: @tertiary-color-dark;
 }
 
@@ -16,20 +57,21 @@
 	}
 
 	.ace_marker-layer .ace_active-line {
-	    background-color: fade(@primary-desaturated, 5%);
+		background-color: fade(@primary-desaturated, 5%);
 	}
 
 	.ace_cursor {
-	    color: darken(@primary-desaturated, 30%);
+		color: darken(@primary-desaturated, 30%);
 	}
 
 	.ace_print-margin {
 		background-color: fade(@primary-desaturated, 5%);
 	}
 
-	.ace_markup.ace_heading {
-		color: @tertiary-color-darker;
+	.ace_markup.ace_heading,
+	.ace_heading {
 		font-weight: bold;
+		color: #964C23;
 	}
 
 	.ace_markup.ace_list {
@@ -37,7 +79,7 @@
 	}
 
 	.ace_constant.ace_language {
-	    color: @tertiary-color-light;
+		color: @tertiary-color-light;
 		font-weight: normal;
 	}
 
@@ -49,7 +91,7 @@
 	}
 
 	.ace_keyword.ace_operator {
-	    color: @tertiary-color-dark;
+		color: @tertiary-color-dark;
 		background-color: transparent;
 	}
 
@@ -66,17 +108,19 @@
 	}
 
 	.ace_invalid {
-	    color: inherit;
-        background: inherit;
+		color: inherit;
+		background: inherit;
 	}
 
 	.ace_strong {
 		color: @tertiary-color-dark;
+		background: none;
 		font-weight: bold;
 	}
 
 	.ace_emphasis {
 		color: @tertiary-color-darker;
+		background: none;
 		font-style: italic;
 	}
 
@@ -94,7 +138,7 @@
 	}
 
 	.ace_link {
-	    color: @tertiary-color;
+		color: @tertiary-color;
 		background-color: @code-bg;
 	}
 
@@ -103,81 +147,20 @@
 	}
 
 	.ace_constant {
-	    color: @tertiary-color-dark;
+		color: @tertiary-color-dark;
 	}
 
 	.ace_comment {
-	    color: @tertiary-color-light;
+		color: @tertiary-color-light;
 		font-style: italic;
 	}
 
 	.ace_marker-layer .misspelled {
-	    position: absolute;
-	    z-index: -2;
-	    border-bottom: 1px dotted red;
-	    margin-bottom: -1px;
+		position: absolute;
+		z-index: -2;
+		border-bottom: 1px dotted red;
+		margin-bottom: -1px;
 	}
-}
-
-.ace_search {
-	background-color: @secondary-bg-light;
-	border: 1px solid @secondary-border-color-light;
-	border-top: 0;
-	padding: 10px 15px 5px;
-	font-family: @font-family-base;
-	min-width: 318px;
-	.ace_search_form, .ace_replace_form {
-        border-color: @input-border;
-	    margin-bottom: 10px;
-	}
-	.ace_search_field {
-	    width: 185px;
-	}
-	.ace_search_field, .ace_searchbtn, .ace_replacebtn {
-        height: @input-height-small;
-        padding: 0 @padding-base-horizontal;
-        font-size: @font-size-base;
-        line-height: @line-height-base;
-        color: @input-color;
-        vertical-align: middle;
-        background-color: @secondary-bg-lighter;
-        border-color: @input-border;
-        box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
-	}
-	.ace_searchbtn {
-        background-image: none;
-        font-family: "fontello";
-        width: auto;
-        font-size: 16px;
-        &.next:before {
-            content: '\e880';
-        }
-        &.prev:before {
-            content: '\e87f';
-        }
-    }
-	.ace_replacebtn {
-        padding: 0 4px;
-    }
-    .ace_searchbtn_close {
-        background: transparent;
-        margin: 0;
-        font-size: (@font-size-base * 1.5);
-        font-weight: @close-font-weight;
-        text-shadow: @close-text-shadow;
-        opacity: 0.3;
-        &:before {
-            content: '\d7';
-        }
-        &:hover,
-        &:focus {
-            color: @close-color;
-            text-decoration: none;
-            cursor: pointer;
-            opacity: 0.5;
-            background: transparent;
-        }
-    }
 }
 
 }

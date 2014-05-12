@@ -35,7 +35,7 @@ $di->set('raven', function() use ($config) {
 if (DEV_MODE) {
     ini_set('display_errors', true);
     ini_set('html_errors', true);
-//    new \Whoops\Provider\Phalcon\WhoopsServiceProvider($di);
+    new \Whoops\Provider\Phalcon\WhoopsServiceProvider($di);
 } else {
     ini_set('display_errors', false);
     ini_set('html_errors', false);

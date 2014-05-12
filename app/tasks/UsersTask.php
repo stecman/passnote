@@ -109,7 +109,9 @@ class UsersTask extends BaseTask
 
             $newPassword = $this->promptCreatePassword(true);
 
-            $user->save();
+            // TODO: Update approriate keys on password change
+
+//            $user->save();
 
             echo "Password updated.\n";
         } else {

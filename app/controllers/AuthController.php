@@ -15,7 +15,7 @@ class AuthController extends ControllerBase
         $form = new \Phalcon\Forms\Form();
         $form->add($user = new \Phalcon\Forms\Element\Text('user'));
         $form->add($pass = new \Phalcon\Forms\Element\Password('password'));
-        $form->add($twoFactorAuth = new \Phalcon\Forms\Element\Text('token'));
+        $form->add($twoFactorAuth = new \Phalcon\Forms\Element\Numeric('token'));
 
         $user->addValidator(new PresenceOf([
             'message' => 'Username is required.'

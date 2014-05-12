@@ -12,21 +12,34 @@ class Object extends \Phalcon\Mvc\Model
     public $created;
      
     /**
+     * Title of the object
      * @var string
      */
     public $title;
-     
+
     /**
+     * Description if the object needs one.
+     *
+     * Since the object's content is encrypted, it is not possible to search in content.
+     * This field is intended for providing context/information without giving away secrets.
+     *
      * @var string
      */
-    public $content;
+    public $description;
+     
+    /**
+     * Encrypted content of the object
+     *
+     * @var string
+     */
+    protected $content;
      
     /**
      * Encrypted key for this object
      *
      * @var string
      */
-    public $key;
+    protected $key;
      
     /**
      * RSA key pair used to encrypt $key

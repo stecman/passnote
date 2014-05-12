@@ -1,0 +1,76 @@
+// Search form
+
+.sch-container {
+	max-width: 700px;
+}
+
+.sch-form {
+	margin: 1em 0;
+	width: 100%;
+
+	.sch-logo {
+		box-sizing: border-box;
+		width: 10%;
+		height: 29px;
+		float: left;
+		margin-right: 2%;
+		position: relative;
+		top: 6px;
+		opacity: 0.8;
+		transition: 0.4s opacity ease-out;
+		text-decoration: none;
+		background: url('/img/mobius.svg') no-repeat 50%;
+		background-size: contain;
+		text-indent: -500px;
+		overflow: hidden;
+
+		&:hover {
+			opacity: 1;
+		}
+	}
+
+	input {
+		box-sizing: border-box;
+		line-height: 24px;
+		width: 88%;
+		display: block;
+		margin: 0;
+	}
+
+	input[type="search"] {
+		padding: 8px 10px;
+		font-size: 16px;
+	}
+
+	input[type="submit"] {
+		margin-left: -2px;
+	}
+
+	.sch-search-cont {
+		max-width: 90%;
+		display: table-cell;
+		vertical-align: top;
+	}
+
+	.sch-submit-cont {
+		width: 10%;
+		min-width: 76px;
+		display: table-cell;
+		vertical-align: top;
+	}
+
+	@media @xs {
+		.sch-logo {
+			margin-right: 5%;
+		}
+
+		input[type="search"] {
+			max-width: 85%;
+		}
+	}
+}
+
+.nav-header {
+	background: #F3F3F3;
+	border-bottom: 1px solid #FFF;
+}

@@ -1,6 +1,6 @@
 <?php
 
-class ShowTask extends \Phalcon\CLI\Task
+class ShowTask extends BaseTask
 {
     public function mainAction()
     {
