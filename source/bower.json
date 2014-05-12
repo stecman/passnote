@@ -17,7 +17,7 @@
   "dependencies": {
     "ace": "~1.1.3",
     "bootstrap": "~3.1.0",
-    "less-helpers": "ssh://stecman.ath.cx/git/heyday/less-helpers.git#~0.3.0",
+    "less-helpers": "ssh://h.stecman.co.nz/git/heyday/less-helpers.git#~0.3.0",
     "react": "~0.9.0",
     "r.js": "~2.1.10",
     "requirejs": "~2.1.10"
