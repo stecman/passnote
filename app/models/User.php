@@ -23,12 +23,12 @@ class User extends \Phalcon\Mvc\Model
      *
      * @var int
      */
-    public $defaultKey_id;
+    public $accountKey_id;
 
     /**
      * @var Key
      */
-    public $defaultKey;
+    public $accountKey;
 
     /**
      * Hashed password
@@ -61,20 +61,20 @@ class User extends \Phalcon\Mvc\Model
     protected $sessionKey;
 
     /**
-     * Default Key passphrase (encrypted)
+     * Account key passphrase (encrypted)
      *
-     * Key to the default key. Encrypted using the user's password
+     * Key to the user's default key. Encrypted using the user's password
      *
      * @var string
      */
-    protected $defaultKeyPhrase;
+    protected $accountKeyPhrase;
 
     /**
-     * IV for encrypted Default Key passphrase
+     * IV for encrypted accountKeyPhrase
      *
      * @var string
      */
-    protected $defaultKeyIv;
+    protected $accountKeyIv;
 
     /**
      * Create a user and set up keys
@@ -94,10 +94,10 @@ class User extends \Phalcon\Mvc\Model
         $user = new User();
         $user->email = $email;
 
-        $keyPassphrase = $user->setupDefaultKeyPassphrase($password);
+        $keyPassphrase = $user->dangerouslyRegenerateAccountKeyPassphrase($password);
         $key = Key::generate($keyPassphrase);
 
-        $user->defaultKey = $key;
+        $user->accountKey = $key;
 
         return $user;
     }
@@ -145,14 +145,14 @@ class User extends \Phalcon\Mvc\Model
             'alias' => 'Objects'
         ]);
 
-        $this->belongsTo('defaultKey_id', 'Key', 'id', [
-            'alias' => 'DefaultKey'
+        $this->belongsTo('accountKey_id', 'Key', 'id', [
+            'alias' => 'AccountKey'
         ]);
     }
 
     protected function beforeSave()
     {
-        if ($key = $this->defaultKey) {
+        if ($key = $this->accountKey) {
             $key->save();
         }
     }
@@ -189,44 +189,60 @@ class User extends \Phalcon\Mvc\Model
         $this->setOtpKey($otpKey, $newPassword);
     }
 
-    public function getDefaultKeyPassphrase($password)
+    /**
+     * Decrypt and return the passphrase for the user's account key
+     *
+     * @param $password
+     * @return string
+     */
+    public function getAccountKeyPassphrase($password)
     {
         $crypt = new \Stecman\Passnote\Encryptor();
-        return $crypt->decrypt($this->defaultKeyPhrase, $password, $this->defaultKeyIv);
+        return $crypt->decrypt($this->accountKeyPhrase, $password, $this->accountKeyIv);
     }
 
     /**
-     * Unlock the private key and encrypt it with a new random key
+     * Unlock the account's default private key and encrypt it with a new random key
+     *
      * @param $oldPassword
      * @param $newPassword
      * @throws RuntimeException
      */
-    public function recryptDefaultKey($oldPassword, $newPassword)
+    public function recryptAccountKey($oldPassword, $newPassword)
     {
         /** @var Key $key */
-        if (!$key = $this->getDefaultKey()) {
-            throw new \RuntimeException('User does not have a default key');
+        if (!$key = $this->getAccountKey()) {
+            throw new \RuntimeException('User does not have an account key');
         }
 
-        $oldPhrase = $this->getDefaultKeyPassphrase($oldPassword);
-        $newPhrase = $this->setupDefaultKeyPassphrase($newPassword);
+        $oldPhrase = $this->getAccountKeyPassphrase($oldPassword);
+        $newPhrase = $this->dangerouslyRegenerateAccountKeyPassphrase($newPassword);
 
         $key->changePassphrase($oldPhrase, $newPhrase);
     }
 
-    public function setupDefaultKeyPassphrase($password)
+    /**
+     * Replace the currently stored account key passphrase with a new random phrase
+     *
+     * This method DOES NOT change the passphrase of the account key! It only changes the passphrase stored in
+     * the user. To re-encrypt the account key with a new passphrase, use User::recryptAccountKey().
+     *
+     * @param $password
+     * @return string - the new passphrase
+     */
+    public function dangerouslyRegenerateAccountKeyPassphrase($password)
     {
         $crypt = new \Stecman\Passnote\Encryptor();
 
         $newPhrase = base64_encode(openssl_random_pseudo_bytes(48));
-        $this->defaultKeyIv = $crypt->genIv();
-        $this->defaultKeyPhrase = $crypt->encrypt($newPhrase, $password, $this->defaultKeyIv);
+        $this->accountKeyIv = $crypt->genIv();
+        $this->accountKeyPhrase = $crypt->encrypt($newPhrase, $password, $this->accountKeyIv);
 
         return $newPhrase;
     }
 
     /**
-     * Change the account password and update the key of encrypted data that use it
+     * Change the account password and update the key of encrypted data that uses it
      *
      * @param $oldPassword
      * @param $newPassword
@@ -235,15 +251,15 @@ class User extends \Phalcon\Mvc\Model
     {
         $this->setPassword($newPassword);
         $this->recryptOtpKey($oldPassword, $newPassword);
-        $this->recryptDefaultKey($oldPassword, $newPassword);
+        $this->recryptAccountKey($oldPassword, $newPassword);
     }
 
     /**
      * @return Key
      */
-    public function getDefaultKey()
+    public function getAccountKey()
     {
-        return $this->defaultKey ?: $this->getRelated('DefaultKey');
+        return $this->accountKey ?: $this->getRelated('AccountKey');
     }
 
     /**

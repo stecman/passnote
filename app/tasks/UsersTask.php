@@ -15,34 +15,56 @@ class UsersTask extends BaseTask
             die("'$email' is not a valid email address\n");
         }
 
+        if ($user = User::findFirst([
+            'email = :email:',
+            'bind' => [
+                'email' => $email
+            ]
+        ])) {
+            var_dump($user);
+            die("The account $email already exists. Duplicate account emails are not allowed.\n");
+        }
+
         echo "Creating user '$email'\n";
         $password = $this->promptCreatePassword();
 
+        echo "Keying...\n";
+
         $user = new User();
         $user->email = $email;
-        $user->password = $this->security->hash($password);
+        $user->setPassword($password);
 
-        $key = Key::generate( $user->setupDefaultKeyPassphrase($password) );
+        // Create OTP key
+        $otp = Seed::generate(40);
+        $user->setOtpKey($otp->getValue(Seed::FORMAT_BASE32), $password);
+
+        // Create account key
+        $key = Key::generate( $user->dangerouslyRegenerateAccountKeyPassphrase($password) );
         $key->setName('Account key');
 
         // Save user and key
         $this->db->begin();
-        $user->keys = [$key];
         $user->create();
 
-        $user->defaultKey = $key;
+        $key->user_id = $user->id;
+        $key->create();
+
+        $user->accountKey = $key;
         $user->update();
         $this->db->commit();
 
         echo "Created user $email with id {$user->id}\n";
+        echo "OTP: {$this->generateOtpUri($user, $otp)}\n";
     }
 
     /**
      * Enable two factor auth on an account
      *
+     * The result of this can be piped, for example, into a QR code generating utility.
+     *
      * @param $email
      */
-    public function enable_otpAction($email)
+    public function regenerate_otpAction($email)
     {
         /** @var User $user */
         $user = User::findFirst([
@@ -63,13 +85,7 @@ class UsersTask extends BaseTask
             $user->setOtpKey($otp->getValue(Seed::FORMAT_BASE32), $password);
             $user->update();
 
-            $uri = sprintf(
-                'otpauth://totp/Passnote:%s?secret=%s&issuer=Passnote',
-                urlencode($user->email),
-                $otp->getValue(Seed::FORMAT_BASE32)
-            );
-
-            echo "$uri";
+            echo $this->generateOtpUri($user, $otp);
             fwrite(STDIN, "OTP updated\n");
         } else {
             die("No user found for $email\n");
@@ -95,6 +111,7 @@ class UsersTask extends BaseTask
      */
     public function set_passwordAction($email)
     {
+        /** @var User $user */
         $user = User::findFirst([
             'email = :email:',
             'bind' => [
@@ -103,15 +120,17 @@ class UsersTask extends BaseTask
         ]);
 
         if ($user) {
-            if (!$user->isCorrectPassword( $oldPassword = $this->promptInput('Current password:', true) )) {
+            $oldPassword = $this->promptInput('Current password:', true);
+
+            if (!$user->validatePassword( $oldPassword )) {
                 die("Password incorrect\n");
             }
 
             $newPassword = $this->promptCreatePassword(true);
+            $user->changePassword($oldPassword, $newPassword);
 
-            // TODO: Update approriate keys on password change
-
-//            $user->save();
+            $user->accountKey->save();
+            $user->save();
 
             echo "Password updated.\n";
         } else {
@@ -144,6 +163,15 @@ class UsersTask extends BaseTask
     protected function isValidEmail($email)
     {
         return filter_var($email, FILTER_VALIDATE_EMAIL);
+    }
+
+    protected function generateOtpUri(\User $user, \Rych\OTP\Seed $otp)
+    {
+        return sprintf(
+            'otpauth://totp/Passnote:%s?secret=%s&issuer=Passnote',
+            urlencode($user->email),
+            $otp->getValue(Seed::FORMAT_BASE32)
+        );
     }
 
 }

@@ -32,7 +32,7 @@ class ObjectTask  extends BaseTask
         }
 
         $map = $this->promptUserForMapping($data);
-        $key = $user->getDefaultKey();
+        $key = $user->getAccountKey();
 
         $objects = [];
 
