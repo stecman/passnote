@@ -30,11 +30,6 @@ try {
     include __DIR__ . "/../app/config/services.php";
 
     /**
-     * Read environment
-     */
-    if (file_exists($environment = __DIR__ . "/../environment.php")) include $environment;
-
-    /**
      * Handle the request
      */
     $application = new \Phalcon\Mvc\Application($di);
