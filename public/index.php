@@ -2,10 +2,13 @@
 
 try {
 
+    ini_set('phalcon.orm.exception_on_failed_save', true);
+    ini_set('phalcon.orm.not_null_validations', false);
+
+
     /**
      * Use composer autoloader
      */
-
     if (!file_exists($composerAutoload = __DIR__ . '/../vendor/autoload.php')) {
         header('HTTP/1.1 500');
         die("<h1>Server Error</h1><p>Composer vendors are not installed on the server.</p>");

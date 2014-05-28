@@ -76,7 +76,7 @@ class Key extends \Phalcon\Mvc\Model
         // Ensure the passphrase is null for a non-encrypted key
         $passphrase = $this->isEncrypted() ? $oldPassphrase : null;
 
-        if (!$privateKey = openssl_pkey_get_private($this->private_key, $oldPassphrase)) {
+        if (!$privateKey = openssl_pkey_get_private($this->private_key, $passphrase)) {
             throw new \Stecman\Passnote\KeyException('Could not open private key. Wrong passphrase?');
         }
 
@@ -87,8 +87,9 @@ class Key extends \Phalcon\Mvc\Model
      * Encrypt data with the public key for this key
      *
      * @param $data
-     * @return string
+     * @throws Stecman\Passnote\MessageSizeException
      * @throws Stecman\Passnote\CryptException
+     * @return string
      */
     public function encrypt($data)
     {
@@ -116,8 +117,9 @@ class Key extends \Phalcon\Mvc\Model
      *
      * @param $data
      * @param string $passphrase
-     * @return string
+     * @throws Stecman\Passnote\KeyException
      * @throws Stecman\Passnote\CryptException
+     * @return string
      */
     public function decrypt($data, $passphrase=null)
     {

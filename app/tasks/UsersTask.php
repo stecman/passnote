@@ -77,7 +77,7 @@ class UsersTask extends BaseTask
         if ($user) {
             $password = $this->promptInput('User\'s password:', true);
 
-            if (!$user->validatePassword( $oldPassword = $this->promptInput('Current password:', true) )) {
+            if (!$user->validatePassword( $password )) {
                 die("Password incorrect\n");
             }
 
@@ -168,7 +168,7 @@ class UsersTask extends BaseTask
     protected function generateOtpUri(\User $user, \Rych\OTP\Seed $otp)
     {
         return sprintf(
-            'otpauth://totp/Passnote:%s?secret=%s&issuer=Passnote',
+            'otpauth://totp/%s?secret=%s&issuer=Passnote',
             urlencode($user->email),
             $otp->getValue(Seed::FORMAT_BASE32)
         );
