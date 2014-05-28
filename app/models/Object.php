@@ -31,11 +31,12 @@ class Object extends \Phalcon\Mvc\Model
     protected $content;
      
     /**
-     * Encrypted key for this object
+     * Passphrase for the AES encryption of $content.
+     * Encrypted with the Key indicated by $key_id
      *
      * @var string
      */
-    protected $key;
+    protected $encryptionKey;
      
     /**
      * RSA key pair used to encrypt $key
@@ -65,6 +66,13 @@ class Object extends \Phalcon\Mvc\Model
      */
     public $isBinary;
 
+    /**
+     * SHA1 hash of the unencrypted content
+     *
+     * @var string
+     */
+    public $checksum;
+
     public function initialize()
     {
         $this->useDynamicUpdate(true);
@@ -74,9 +82,66 @@ class Object extends \Phalcon\Mvc\Model
 
         $this->belongsTo('user_id', 'User', 'id');
         $this->belongsTo('key_id', 'Key', 'id');
+
         $this->hasMany('id', 'Object', 'parent_id', [
             'alias' => 'Children'
         ]);
+
+        $this->hasMany('id', 'ObjectVersion', 'object_id', [
+            'alias' => 'Versions'
+        ]);
+    }
+
+    /**
+     * @param string $content
+     */
+    public function setContent($content)
+    {
+        if (!$this->encryptionKey) {
+
+        }
+
+        /** @var Key $key */
+        $key = $this->encryptionKey;
+
+        $this->checksum = sha1($content);
+        $this->content = $key->encrypt();
+    }
+
+    /**
+     * @param string $password
+     */
+    public function getContent($password)
+    {
+        /** @var Key $key */
+        $key = $this->encryptionKey;
+        $key->decrypt($this->content, $this->getEncryptionKey($password));
+    }
+
+    protected function getEncryptionKey($password)
+    {
+
+    }
+
+    protected function beforeUpdate()
+    {
+        $this->saveVersion();
+    }
+
+    /**
+     * Create version of this object from the current state of the database
+     */
+    protected function saveVersion()
+    {
+        $previous = self::findFirst($this->id);
+
+        if ($previous && $previous->checksum !== $this->checksum) {
+            $version = new ObjectVersion();
+            $version->content = $this->content;
+            $version->checksum = $this->checksum;
+            $version->object_id = $this->id;
+            $version->create();
+        }
     }
      
 }

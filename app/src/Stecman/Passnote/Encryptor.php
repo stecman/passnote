@@ -25,7 +25,7 @@ class Encryptor
 
     protected function getCipher()
     {
-        return MCRYPT_RIJNDAEL_192;
+        return MCRYPT_RIJNDAEL_256;
     }
 
     protected function getMcryptMode()
