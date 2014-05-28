@@ -45,19 +45,21 @@ class Security extends \Phalcon\Mvc\User\Plugin
      */
     public function beforeException(\Phalcon\Events\Event $event, Dispatcher $dispatcher, \Exception $exception)
     {
-        switch ($exception->getCode()) {
-            case Dispatcher::EXCEPTION_HANDLER_NOT_FOUND:
-            case Dispatcher::EXCEPTION_ACTION_NOT_FOUND:
+        if ($exception instanceof Phalcon\Mvc\Dispatcher\Exception) {
+            switch ($exception->getCode()) {
+                case Dispatcher::EXCEPTION_HANDLER_NOT_FOUND:
+                case Dispatcher::EXCEPTION_ACTION_NOT_FOUND:
 
-                $this->response->setStatusCode(404, 'Not found');
-                $this->view->setVar('status', 404);
-                $this->view->setVar('message', 'Not found');
-                $this->view->setVar('exception', $exception->getMessage());
-                $this->view->render('index', 'error');
+                    $this->response->setStatusCode(404, 'Not found');
+                    $this->view->setVar('status', 404);
+                    $this->view->setVar('message', 'Not found');
+                    $this->view->setVar('exception', $exception->getMessage());
+                    $this->view->render('index', 'error');
 
-                $this->response->send();
+                    $this->response->send();
 
-                return false;
+                    return false;
+            }
         }
     }
 }
