@@ -4,9 +4,11 @@ namespace Stecman\Passnote;
 
 class Encryptor
 {
+    const MAX_KEY_SIZE = 32;
+
     public function genIv()
     {
-        $iv_size = mcrypt_get_iv_size($this->getCipher(), $this->getMcryptMode());
+        $iv_size = $this->getIvSize();
         return mcrypt_create_iv($iv_size, MCRYPT_RAND);
     }
 
@@ -21,6 +23,11 @@ class Encryptor
 
         // Strip null padding bytes
         return rtrim($value, "\0");
+    }
+
+    public function getIvSize()
+    {
+        return mcrypt_get_iv_size($this->getCipher(), $this->getMcryptMode());
     }
 
     protected function getCipher()

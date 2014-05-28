@@ -37,7 +37,14 @@ class Object extends \Phalcon\Mvc\Model
      * @var string
      */
     protected $encryptionKey;
-     
+
+    /**
+     * Initialisation vector for $this->encryptionKey
+     *
+     * @var string
+     */
+    protected $encryptionKeyIv;
+
     /**
      * RSA key pair used to encrypt $key
      *
@@ -64,7 +71,7 @@ class Object extends \Phalcon\Mvc\Model
      *
      * @var boolean
      */
-    public $isBinary;
+    public $isBinary = false;
 
     /**
      * SHA1 hash of the unencrypted content
@@ -93,34 +100,67 @@ class Object extends \Phalcon\Mvc\Model
     }
 
     /**
-     * @param string $content
+     * Set the plain-text content of this object
+     *
+     * This method handles encryption of the content
+     *
+     * @param string $plainText
      */
-    public function setContent($content)
+    public function setContent($plainText)
     {
-        if (!$this->encryptionKey) {
+        $crypt = new \Stecman\Passnote\Encryptor();
+        $blub = $this->generateEncryptionKey();
+        $iv = $crypt->genIv();
 
-        }
-
-        /** @var Key $key */
-        $key = $this->encryptionKey;
-
-        $this->checksum = sha1($content);
-        $this->content = $key->encrypt();
+        $this->setEncryptionKey($blub);
+        $this->checksum = sha1($plainText);
+        $this->encryptionKeyIv = $iv;
+        $this->content = $crypt->encrypt($plainText, $blub, $iv);
     }
 
     /**
-     * @param string $password
+     * Fetch and decrypt the content of this object
+     *
+     * @param $passphrase - Key passphrase
+     * @return string
      */
-    public function getContent($password)
+    public function getContent($passphrase)
     {
-        /** @var Key $key */
-        $key = $this->encryptionKey;
-        $key->decrypt($this->content, $this->getEncryptionKey($password));
+        $crypt = new \Stecman\Passnote\Encryptor();
+        $blub = $this->getEncryptionKey($passphrase);
+
+        return $crypt->decrypt($this->content, $blub, $this->encryptionKeyIv);
     }
 
-    protected function getEncryptionKey($password)
+    /**
+     * Get the plain-text blub used to encrypt $this->content
+     *
+     * @param $passphrase - passphrase for this object's Key
+     * @return array
+     * @throws RuntimeException
+     */
+    protected function getEncryptionKey($passphrase)
     {
+        /** @var \Key $key */
+        $key = $this->key;
 
+        if (!$key) {
+            throw new \RuntimeException("Object {$this->id} has no related key");
+        }
+
+        return $key->decrypt($this->encryptionKey, $passphrase);
+    }
+
+    protected function setEncryptionKey($string)
+    {
+        /** @var \Key $key */
+        $key = $this->key;
+
+        if (!$key) {
+            throw new \RuntimeException("Object {$this->id} has no related key");
+        }
+
+        $this->encryptionKey = $key->encrypt($string);
     }
 
     protected function beforeUpdate()
@@ -136,12 +176,31 @@ class Object extends \Phalcon\Mvc\Model
         $previous = self::findFirst($this->id);
 
         if ($previous && $previous->checksum !== $this->checksum) {
-            $version = new ObjectVersion();
-            $version->content = $this->content;
-            $version->checksum = $this->checksum;
-            $version->object_id = $this->id;
+            $version = ObjectVersion::versionFromObject($previous);
+            $version->setEncryptionKey($this->encryptionKey, $this->encryptionKeyIv);
             $version->create();
         }
+    }
+
+    /**
+     * Generate a new random string to encrypt content with
+     *
+     * @throws RuntimeException
+     * @return string - plain text encryption key
+     */
+    protected function generateEncryptionKey()
+    {
+        /** @var \Key $key */
+        $key = $this->key;
+
+        if (!$key) {
+            throw new \RuntimeException("Object {$this->id} has no related key");
+        }
+
+        // Length of blub that will fit inside $this->key
+        $length = min( \Stecman\Passnote\Encryptor::MAX_KEY_SIZE, $key->getMaxMessageSize() );
+
+        return openssl_random_pseudo_bytes($length);
     }
      
 }

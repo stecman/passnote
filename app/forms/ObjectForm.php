@@ -44,9 +44,16 @@ class ObjectForm extends \Phalcon\Forms\Form
     {
         $object = $this->getEntity() ?: new Object();
 
+        if ($object->key_id != $this->request->getPost('key_id')) {
+            $object->key = Key::findFirst( (int) $this->request->getPost('key_id') );
+        }
+
+        $object->user = $this->user;
         $object->title = $this->request->getPost('title');
         $object->description = $this->request->getPost('description');
-        $object-> = $this->request->getPost('body');
+        $object->setContent( $this->request->getPost('body') );
+
+        $object->save();
     }
 
     /**
