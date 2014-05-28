@@ -15,7 +15,7 @@ class Key extends \Phalcon\Mvc\Model
      *
      * @var string
      */
-    protected $name;
+    public $name;
 
     protected $public_key;
 
