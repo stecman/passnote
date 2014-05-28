@@ -3,6 +3,7 @@
 
 class Key extends \Phalcon\Mvc\Model
 {
+    use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
 
     /**
      * @var integer

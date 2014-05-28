@@ -5,6 +5,7 @@ use Phalcon\Mvc\Model\Validator\Email as Email;
 
 class User extends \Phalcon\Mvc\Model
 {
+    use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
 
     /**
      * @var integer

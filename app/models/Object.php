@@ -3,13 +3,9 @@
 
 class Object extends \Phalcon\Mvc\Model
 {
+    use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
 
     public $id;
-     
-    /**
-     * @var string
-     */
-    public $created;
      
     /**
      * Title of the object
