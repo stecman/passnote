@@ -10,6 +10,12 @@ body {
 	font-family: sans-serif;
 }
 
+@media print {
+	a[href]:after {
+		content: " (" attr(href) ") ";
+	}
+}
+
 .fill-frame {
 	position: fixed;
 	overflow: auto;
@@ -20,7 +26,7 @@ body {
 	margin: auto;
 	width: 100%;
 	height: 100%;
-	.linear-gradient(top, #FAFAFA, #F3F3F3);
+	background: #FDFDFD;
 }
 
 }
