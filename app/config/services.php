@@ -107,9 +107,25 @@ $di->set('modelsMetadata', function () {
  */
 
 $di->setShared('session', function () {
+
+    ini_set('session.name', 'session');
+    ini_set('session.cookie_httponly', true);
+    ini_set('session.hash_function', 'sha256');
+    ini_set('session.gc_maxlifetime', 20 * 60 * 60);
+
+    if (!DEV_MODE) {
+        ini_set('session.cookie_secure', true);
+    }
+
     $session = new SessionAdapter();
     $session->start();
     return $session;
+});
+
+$di->set('cookies', function() {
+    $cookies = new Phalcon\Http\Response\Cookies();
+    $cookies->useEncryption(false);
+    return $cookies;
 });
 
 

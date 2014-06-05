@@ -47,9 +47,10 @@ class AuthController extends ControllerBase
 
     public function logoutAction()
     {
+        $keyService = new \Stecman\Passnote\AccountKeyService();
+        $keyService->purgeSessionKey();
         $this->session->destroy();
-        header('Location: /');
-        die();
+        $this->response->redirect('');
     }
 
     public function tryLogin($data)
@@ -85,7 +86,11 @@ class AuthController extends ControllerBase
                 };
             }
 
+            $keyService = new \Stecman\Passnote\AccountKeyService();
+            $keyService->unlockAccountKeyForSession($user, $data['password']);
+
             $this->session->set(Security::SESSION_USER_ID, $user->id);
+            session_regenerate_id();
             $this->response->redirect('');
         } else {
             // Keep timing

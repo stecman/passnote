@@ -37,6 +37,8 @@ try {
      */
     $application = new \Phalcon\Mvc\Application($di);
 
+    $application->response->sendHeaders();
+    $application->response->sendCookies();
     echo $application->handle()->getContent();
 
 } catch (\Exception $e) {
