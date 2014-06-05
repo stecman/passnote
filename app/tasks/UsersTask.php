@@ -21,7 +21,6 @@ class UsersTask extends BaseTask
                 'email' => $email
             ]
         ])) {
-            var_dump($user);
             die("The account $email already exists. Duplicate account emails are not allowed.\n");
         }
 
@@ -49,7 +48,7 @@ class UsersTask extends BaseTask
         $key->user_id = $user->id;
         $key->create();
 
-        $user->accountKey = $key;
+        $user->accountKey_id = $key->id;
         $user->update();
         $this->db->commit();
 
