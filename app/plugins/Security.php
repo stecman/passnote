@@ -5,7 +5,6 @@ use Phalcon\Mvc\Dispatcher;
 class Security extends \Phalcon\Mvc\User\Plugin
 {
     const SESSION_USER_ID = 'sec-user';
-    const SESSION_KEY = 'sec-seskey';
 
     /**
      * @return \User
@@ -18,6 +17,14 @@ class Security extends \Phalcon\Mvc\User\Plugin
         if ($id = $session->get(self::SESSION_USER_ID)) {
             return User::findFirst($id);
         }
+    }
+
+    public static function getCurrentUserId()
+    {
+        $di = \Phalcon\DI::getDefault();
+        $session = $di->get('session');
+
+        return $session->get(self::SESSION_USER_ID);
     }
 
     public function beforeDispatch(\Phalcon\Events\Event $event, Dispatcher $dispatcher)

@@ -199,6 +199,11 @@ class User extends \Phalcon\Mvc\Model
     public function getAccountKeyPassphrase($password)
     {
         $crypt = new \Stecman\Passnote\Encryptor();
+
+        if (!$this->accountKeyPhrase) {
+            throw new \RuntimeException('User does not have an account key passphrase set');
+        }
+
         return $crypt->decrypt($this->accountKeyPhrase, $password, $this->accountKeyIv);
     }
 

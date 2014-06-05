@@ -9,4 +9,14 @@ class ControllerBase extends Controller
         $this->view->setPartialsDir('partials');
         $this->view->setVar('isDev', DEV_MODE);
     }
+
+    protected function handleAs404($message = 'Not found')
+    {
+        $this->response->setStatusCode(404, 'Not found');
+        $this->view->setVar('status', 404);
+        $this->view->setVar('message', $message);
+        $this->view->render('index', 'error');
+
+        $this->response->send();
+    }
 }

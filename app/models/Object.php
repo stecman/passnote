@@ -1,9 +1,12 @@
 <?php
 
 
-class Object extends \Phalcon\Mvc\Model
+use Stecman\Passnote\ReadableEncryptedContent;
+
+class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent
 {
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
+    use \Stecman\Passnote\WritableEncryptedContentTrait;
 
     public $id;
      
@@ -22,28 +25,6 @@ class Object extends \Phalcon\Mvc\Model
      * @var string
      */
     public $description;
-     
-    /**
-     * Encrypted content of the object
-     *
-     * @var string
-     */
-    protected $content;
-     
-    /**
-     * Passphrase for the AES encryption of $content.
-     * Encrypted with the Key indicated by $key_id
-     *
-     * @var string
-     */
-    protected $encryptionKey;
-
-    /**
-     * Initialisation vector for $this->encryptionKey
-     *
-     * @var string
-     */
-    protected $encryptionKeyIv;
 
     /**
      * RSA key pair used to encrypt $key
@@ -95,77 +76,49 @@ class Object extends \Phalcon\Mvc\Model
         ]);
 
         $this->hasMany('id', 'ObjectVersion', 'object_id', [
-            'alias' => 'Versions'
+            'alias' => 'Versions',
+            'reusable' => true
         ]);
     }
 
     /**
-     * Set the plain-text content of this object
-     *
-     * This method handles encryption of the content
-     *
-     * @param string $plainText
+     * @return Key
      */
-    public function setContent($plainText)
+    public function getKey()
     {
-        $crypt = new \Stecman\Passnote\Encryptor();
-        $blub = $this->generateEncryptionKey();
-        $iv = $crypt->genIv();
-
-        $this->setEncryptionKey($blub);
-        $this->checksum = sha1($plainText);
-        $this->encryptionKeyIv = $iv;
-        $this->content = $crypt->encrypt($plainText, $blub, $iv);
+        return $this->key;
     }
 
     /**
-     * Fetch and decrypt the content of this object
-     *
-     * @param $passphrase - Key passphrase
-     * @return string
+     * @return int
      */
-    public function getContent($passphrase)
+    public function getKeyId()
     {
-        $crypt = new \Stecman\Passnote\Encryptor();
-        $blub = $this->getEncryptionKey($passphrase);
-
-        return $crypt->decrypt($this->content, $blub, $this->encryptionKeyIv);
+        return $this->key_id;
     }
 
     /**
-     * Get the plain-text blub used to encrypt $this->content
+     * Get the raw encrypted content of this object
      *
-     * @param $passphrase - passphrase for this object's Key
-     * @return array
-     * @throws RuntimeException
+     * @param ObjectVersion $version
+     * @return string - encrypted bytes
      */
-    protected function getEncryptionKey($passphrase)
+    public function copyStateToVersion(ObjectVersion $version)
     {
-        /** @var \Key $key */
-        $key = $this->key;
+        $version->setEncryptionKey($this->encryptionKey, $this->encryptionKeyIv);
+        $version->setEncryptedContent($this->content);
+        $version->isBinary = $this->isBinary;
+        $version->checksum = $this->checksum;
 
-        if (!$key) {
-            throw new \RuntimeException("Object {$this->id} has no related key");
-        }
-
-        return $key->decrypt($this->encryptionKey, $passphrase);
-    }
-
-    protected function setEncryptionKey($string)
-    {
-        /** @var \Key $key */
-        $key = $this->key;
-
-        if (!$key) {
-            throw new \RuntimeException("Object {$this->id} has no related key");
-        }
-
-        $this->encryptionKey = $key->encrypt($string);
+        return $version;
     }
 
     protected function beforeUpdate()
     {
         $this->saveVersion();
+
+        // Update the created date, since this is effectively a new object now (the old one is the version)
+        $this->created = date('Y-m-d H:i:s');
     }
 
     /**
@@ -177,7 +130,6 @@ class Object extends \Phalcon\Mvc\Model
 
         if ($previous && $previous->checksum !== $this->checksum) {
             $version = ObjectVersion::versionFromObject($previous);
-            $version->setEncryptionKey($this->encryptionKey, $this->encryptionKeyIv);
             $version->create();
         }
     }
@@ -202,5 +154,5 @@ class Object extends \Phalcon\Mvc\Model
 
         return openssl_random_pseudo_bytes($length);
     }
-     
+
 }

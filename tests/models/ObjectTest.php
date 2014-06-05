@@ -31,6 +31,7 @@ class ObjectTest extends PHPUnit_Framework_TestCase
 
         $this->object->setContent($content);
         $firstRunChecksum = $this->object->checksum;
+        $this->assertNotEmpty($this->object->checksum);
 
         $this->object->setContent($content);
         $this->assertEquals($firstRunChecksum, $this->object->checksum);

@@ -40,6 +40,13 @@ class ObjectForm extends \Phalcon\Forms\Form
         ]));
     }
 
+    public function setBody($content)
+    {
+        if (!$this->request->isPost()) {
+            $this->get('body')->setDefault($content);
+        }
+    }
+
     public function handleSubmit()
     {
         $object = $this->getEntity() ?: new Object();
@@ -54,6 +61,8 @@ class ObjectForm extends \Phalcon\Forms\Form
         $object->setContent( $this->request->getPost('body') );
 
         $object->save();
+
+        $this->flash->success('Object saved');
     }
 
     /**

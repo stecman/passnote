@@ -1,11 +1,11 @@
 <div class="row">
 	<div class="col-md-12 obj-list">
-		{% for i in 0..10 %}
-		<a href="/object/6c7x">
-			<h2 class="title">Netherbask login</h2>
+		{% for object in objects.getPaginate().items %}
+		<a href="/object/{{ object.id | escape_attr }}">
+			<h2 class="title">{{ object.title | e }}</h2>
 			<p class="meta">
-				<span class="date" title="{{ date('j M Y, g:ia') }}">{{ date('j M Y') }}</span>
-				Credentials for a top secret system in the Netherlands.
+				<span class="date" title="{{ object.getDateCreated('j M Y, g:ia') }}">{{ object.getDateCreated('j M Y') }}</span>
+				{{ object.description | e }}
 			</p>
 		</a>
 		{% endfor %}

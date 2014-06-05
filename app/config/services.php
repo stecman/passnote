@@ -55,6 +55,10 @@ $di->set('url', function () use ($config) {
     return $url;
 }, true);
 
+$di->set('router', function () {
+    return require __DIR__ . '/routes.php';
+});
+
 /**
  * Setting up the view component
  */

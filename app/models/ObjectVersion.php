@@ -1,7 +1,10 @@
 <?php
 
-class ObjectVersion extends \Phalcon\Mvc\Model
+use Stecman\Passnote\ReadableEncryptedContent;
+
+class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedContent
 {
+    use \Stecman\Passnote\ReadableEncryptedContentTrait;
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
 
     /**
@@ -16,26 +19,6 @@ class ObjectVersion extends \Phalcon\Mvc\Model
      * @var integer
      */
     public $object_id;
-
-    /**
-     * @var string
-     */
-    protected $content;
-
-    /**
-     * Passphrase for the AES encryption of $content.
-     * Encrypted with the Key indicated by $key_id
-     *
-     * @var string
-     */
-    protected $encryptionKey;
-
-    /**
-     * Initialisation vector for $this->encryptionKey
-     *
-     * @var string
-     */
-    protected $encryptionKeyIv;
 
     /**
      * SHA1 hash of the unencrypted content
@@ -72,10 +55,15 @@ class ObjectVersion extends \Phalcon\Mvc\Model
         $version = new ObjectVersion();
 
         $version->master = $object;
-        $version->content = $object->content;
-        $version->checksum = $object->checksum;
+        $version->created = $object->getDateCreated();
+        $object->copyStateToVersion($version);
 
         return $version;
+    }
+
+    public function setEncryptedContent($raw)
+    {
+        $this->content = $raw;
     }
 
     public function setEncryptionKey($key, $iv)
@@ -84,9 +72,28 @@ class ObjectVersion extends \Phalcon\Mvc\Model
         $this->encryptionKeyIv = $iv;
     }
 
+    /**
+     * @return Object
+     */
     public function getMaster()
     {
-        return $this->getRelated('Master');
+        return $this->master;
+    }
+
+    /**
+     * @return Key
+     */
+    public function getKey()
+    {
+        return $this->getMaster()->getKey();
+    }
+
+    /**
+     * @return int
+     */
+    public function getKeyId()
+    {
+        return $this->getMaster()->key_id;
     }
 
 }
