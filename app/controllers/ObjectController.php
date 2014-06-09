@@ -5,6 +5,11 @@ use Stecman\Passnote\ReadableEncryptedContentTrait;
 
 class ObjectController extends ControllerBase
 {
+    public static function getObjectUrl(Object $object)
+    {
+        return 'object/' . $object->id;
+    }
+
     public function indexAction($id)
     {
         $object = $this->getObjectWithId($id);
@@ -12,7 +17,6 @@ class ObjectController extends ControllerBase
         if ($object) {
             $content = $this->decryptContent($object);
 
-            $this->view->setLayout('app');
             $this->view->setVar('object', $object);
             $this->view->setVar('decrypted_content', $content);
         } else {
@@ -55,7 +59,7 @@ class ObjectController extends ControllerBase
 
             krsort($versions);
 
-            $this->view->setLayout('app');
+            $this->view->setLayout('object');
             $this->view->setVar('object', $object);
             $this->view->setVar('versions', $versions);
         } else {
@@ -63,34 +67,20 @@ class ObjectController extends ControllerBase
         }
     }
 
-    public function newAction()
-    {
-        $this->view->setLayout('app');
-
-        $form = new ObjectForm(null, Security::getCurrentUser());
-        $this->view->setVar('form', $form);
-
-        if ($this->request->isPost() && $form->isValid($_POST)) {
-            if (!$this->security->checkToken()) {
-                $this->flash->error('Invalid security token. Please try submitting the form again.');
-                return;
-            }
-
-            $form->handleSubmit();
-        }
-    }
-
     public function editAction($id)
     {
-        $this->view->setLayout('app');
-
         $object = $this->getObjectWithId($id);
-        $content = $this->decryptContent($object);
+        $form = new ObjectForm(null, Security::getCurrentUser());
 
-        $form = new ObjectForm($object, Security::getCurrentUser());
-        $form->setBody($content);
+        if ($object) {
+            $content = $this->decryptContent($object);
+            $form->setBody($content);
+            $form->setEntity($object);
+            $this->view->setVar('object', $object);
+        }
+
+
         $this->view->setVar('form', $form);
-        $this->view->setVar('object', $object);
 
         if ($this->request->isPost() && $form->isValid($_POST)) {
             if (!$this->security->checkToken()) {
@@ -98,7 +88,11 @@ class ObjectController extends ControllerBase
                 return;
             }
 
-            $form->handleSubmit();
+            $savedObject = $form->handleSubmit();
+
+            if (!$object) {
+                $this->response->redirect( self::getObjectUrl($savedObject) );
+            }
         }
     }
 

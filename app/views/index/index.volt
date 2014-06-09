@@ -1,3 +1,5 @@
+{{ content() }}
+
 <div class="row">
 	<div class="col-md-12 obj-list">
 		{% for object in objects.getPaginate().items %}

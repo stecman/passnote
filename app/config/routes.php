@@ -2,7 +2,7 @@
 
 $router = new \Phalcon\Mvc\Router(false);
 
-$router->add('/object/([A-Fa-f0-9])+/:action', [
+$router->add('/object/([A-Fa-f0-9]+|new)/:action', [
     'controller' => 'object',
     'id' => 1,
     'action' => 2,
@@ -12,11 +12,6 @@ $router->add('/object/([A-Fa-f0-9])+', [
     'controller' => 'object',
     'action' => 'index',
     'id' => 1,
-]);
-
-$router->add('/object/new', [
-    'controller' => 'object',
-    'action' => 'new'
 ]);
 
 $router->add('/auth/:action', [

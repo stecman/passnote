@@ -25,13 +25,15 @@
 
 		<div class="row">
 			<div class="col-md-12">
-				<a href="/object/new">New Object</a>
+				<a href="/object/new/edit">New Object</a>
 				<a href="/auth/logout" class="right">Logout</a>
 				<a href="/account" class="right">Account</a>
 			</div>
 		</div>
 	</div>
 	</div>
+
+	{% block precontent %}{% endblock %}
 
 	<div class="container sch-container">
 		{% block content %}

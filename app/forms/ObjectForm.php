@@ -47,6 +47,11 @@ class ObjectForm extends \Phalcon\Forms\Form
         }
     }
 
+    /**
+     * Handle the form and return the saved object
+     *
+     * @return Object
+     */
     public function handleSubmit()
     {
         $object = $this->getEntity() ?: new Object();
@@ -63,6 +68,8 @@ class ObjectForm extends \Phalcon\Forms\Form
         $object->save();
 
         $this->flash->success('Object saved');
+
+        return $object;
     }
 
     /**
