@@ -15,11 +15,11 @@ class IndexController extends ControllerBase
         $this->view->setVar('objects', $paginatedObjects);
     }
 
-    public function errorAction()
+    public function errorAction($message = 'Not found')
     {
         $this->response->setStatusCode(404, 'Not found');
         $this->view->setVar('status', 404);
-        $this->view->setVar('message', 'Not found');
+        $this->view->setVar('message', $message);
     }
 
     /**

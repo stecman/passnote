@@ -15,8 +15,7 @@ class ControllerBase extends Controller
         $this->response->setStatusCode(404, 'Not found');
         $this->view->setVar('status', 404);
         $this->view->setVar('message', $message);
-        $this->view->render('index', 'error');
-
-        $this->response->send();
+        $this->dispatcher->setControllerName('index');
+        $this->dispatcher->setActionName('error');
     }
 }
