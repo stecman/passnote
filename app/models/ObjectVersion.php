@@ -7,6 +7,9 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
     use \Stecman\Passnote\ReadableEncryptedContentTrait;
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
 
+    const OLDER_VERSION = 'older';
+    const NEWER_VERSION = 'newer';
+
     /**
      *
      * @var integer
@@ -94,6 +97,38 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
     public function getKeyId()
     {
         return $this->getMaster()->key_id;
+    }
+
+    /**
+     * Get a version of the same master object, relative to this version
+     *
+     * @param $relativeAge - one of ObjectVersion::NEWER_VERSION or ObjectVersion::OLDER_VERSION
+     * @return Object
+     * @throws RuntimeException
+     */
+    public function getSibling($relativeAge)
+    {
+        $query = $this->getModelsManager()->createBuilder();
+        $query->limit(1);
+        $query->addFrom('ObjectVersion');
+        $query->andWhere('object_id = :object_id:');
+
+        switch ($relativeAge) {
+            case self::NEWER_VERSION:
+                $query->andWhere('id > :current_version_id:');
+                break;
+            case self::OLDER_VERSION:
+                $query->andWhere('id < :current_version_id:');
+                $query->orderBy('id DESC');
+                break;
+            default:
+                throw new \RuntimeException('Invalid age. The only acceptable values are the constants ObjectVersion::NEWER_VERSION and ObjectVersion::OLDER_VERSION');
+        }
+
+        return $query->getQuery()->execute([
+            'current_version_id' => $this->id,
+            'object_id' => $this->object_id
+        ])->getFirst();
     }
 
 }

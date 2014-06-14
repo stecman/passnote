@@ -55,8 +55,6 @@ class ObjectController extends ControllerBase
             ));
             $versions[] = $object;
 
-
-
             krsort($versions);
 
             $this->view->setLayout('object');
@@ -64,6 +62,32 @@ class ObjectController extends ControllerBase
             $this->view->setVar('versions', $versions);
         } else {
             $this->handleAs404('Object not found');
+        }
+    }
+
+    public function showVersionAction($objectId, $versionId)
+    {
+        $version = $this->modelsManager->executeQuery(
+            'SELECT ObjectVersion.* FROM ObjectVersion'
+            .' LEFT JOIN Object ON ObjectVersion.object_id = Object.id'
+            .' WHERE ObjectVersion.id = :version_id: AND ObjectVersion.object_id = :object_id: AND Object.user_id = :user_id:',
+            [
+                'version_id' => (int) $versionId,
+                'object_id' => (int) $objectId,
+                'user_id' => Security::getCurrentUserId()
+            ]
+        )->getFirst();
+
+        if ($version) {
+            $content = $this->decryptContent($version);
+
+            $this->view->setVar('object', $version->master);
+            $this->view->setVar('version', $version);
+            $this->view->setVar('next_version', $version->getSibling(ObjectVersion::NEWER_VERSION));
+            $this->view->setVar('prev_version', $version->getSibling(ObjectVersion::OLDER_VERSION));
+            $this->view->setVar('decrypted_content', $content);
+        } else {
+            $this->handleAs404('Object or version not found');
         }
     }
 

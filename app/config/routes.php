@@ -8,6 +8,13 @@ $router->add('/object/([0-9]+|new)/:action', [
     'action' => 2,
 ]);
 
+$router->add('/object/([0-9]+)/versions/([0-9]+)', [
+    'controller' => 'object',
+    'action' => 'showVersion',
+    'objectId' => 1,
+    'versionId' => 2,
+]);
+
 $router->add('/object/([0-9]+)', [
     'controller' => 'object',
     'action' => 'index',
