@@ -13,7 +13,7 @@
 
 	<div class="form-group">
 		<label for="body">Content</label>
-		{{ form.render('body', ['class': 'monospaced', 'rows': 10]) }}
+		{{ form.render('body', ['class': 'monospaced', 'rows': 20]) }}
 	</div>
 
 	<div class="form-group">
