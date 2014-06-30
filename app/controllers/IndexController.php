@@ -33,6 +33,16 @@ class IndexController extends ControllerBase
             'user_id' => Security::getCurrentUserId()
         ]);
 
+        if ($search = trim($this->request->getPost('query'))) {
+            
+            // Crude search for each term using LIKE
+            foreach (explode(' ', $search) as $term) {
+                $query->andWhere('title LIKE :term: OR description LIKE :term:', [
+                    'term' => "%$term%"
+                ]);
+            }
+        }
+
         return $query;
     }
 

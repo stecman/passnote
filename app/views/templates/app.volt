@@ -1,12 +1,12 @@
 <div class="fill-frame">
 	<div class="nav-header">
 		<div class="container sch-container h-clearfix">
-			<form class="row" action="/object/find" method="post">
+			<form class="row" action="/" method="post">
 				<div class="sch-form col-md-12">
 					
 					<div class="sch-search-cont">
 						<a href="/" class="sch-logo">△</a>
-						<input type="search" name="query">
+						<input type="search" name="query" value="{{ request.getPost('query') | escape_attr }}" autofocus>
 					</div>
 
 					<div class="sch-submit-cont">
