@@ -10,10 +10,12 @@
 				{{ object.description | e }}
 			</p>
 		</a>
+		{% else %}
+			{% if search_term is defined %}
+				<p>No objects found matching <em>"{{ search_term }}"</em></p>
+			{% else %}
+				<p>No objects found</p>
+			{% endif %}
 		{% endfor %}
 	</div>
-</div>
-
-<div class="row">
-	<div id="note_content" class="ned-editor ace-tm"></div>
 </div>

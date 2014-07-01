@@ -13,6 +13,8 @@ class IndexController extends ControllerBase
 
         $this->view->setLayout('app');
         $this->view->setVar('objects', $paginatedObjects);
+        $this->view->setVar('search_autofocus', true);
+        $this->view->setVar('search_term', trim($this->request->getPost('query')));
     }
 
     public function errorAction($message = 'Not found')
