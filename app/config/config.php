@@ -20,9 +20,12 @@ $config = [
     ],
     'logging' => [
         'ravenUrl' => ''
+    ],
+    'object-renderers' => [
+        '\Stecman\Passnote\Object\Renderer\PlainText',
+        '\Stecman\Passnote\Object\Renderer\Markdown'
     ]
 ];
-
 
 // Merge in any environment specific config
 $envFile = __DIR__ . '/../../config.php';

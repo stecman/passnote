@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Stecman\Passnote;
+namespace Stecman\Passnote\Object;
 
 
 interface ReadableEncryptedContent

@@ -99,6 +99,16 @@ $di->set('db', function () use ($config) {
     ));
 });
 
+$di->setShared('renderer', function() use ($config) {
+    $renderService = new \Stecman\Passnote\Object\Renderer();
+
+    foreach ($config->get('object-renderers') as $rendererClass) {
+        $renderService->addRenderer(new $rendererClass);
+    }
+
+    return $renderService;
+});
+
 /**
  * If the configuration specify the use of metadata adapter use it or use memory otherwise
  */

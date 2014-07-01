@@ -22,6 +22,11 @@
 	</div>
 
 	<div class="form-group">
+		<label for="format">Format</label>
+		{{ form.render('format') }}
+	</div>
+
+	<div class="form-group">
 		<label for="key_id">Encrpytion Key</label>
 		{{ form.render('key_id') }}
 	</div>

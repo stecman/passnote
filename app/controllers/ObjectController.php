@@ -1,7 +1,7 @@
 <?php
 
-use Stecman\Passnote\ReadableEncryptedContent;
-use Stecman\Passnote\ReadableEncryptedContentTrait;
+use Stecman\Passnote\Object\ReadableEncryptedContent;
+use Stecman\Passnote\Object\ReadableEncryptedContentTrait;
 
 class ObjectController extends ControllerBase
 {

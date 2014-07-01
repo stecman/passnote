@@ -16,4 +16,5 @@
 </div>
 
 <hr/>
-<pre><code>{{ decrypted_content }}</code></pre>
+
+{{ renderer.render(version, decrypted_content) }}

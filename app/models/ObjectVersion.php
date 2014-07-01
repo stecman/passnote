@@ -1,19 +1,17 @@
 <?php
 
-use Stecman\Passnote\ReadableEncryptedContent;
+use Stecman\Passnote\Object\ReadableEncryptedContent;
+use Stecman\Passnote\Object\Renderable;
 
-class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedContent
+class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Renderable
 {
-    use \Stecman\Passnote\ReadableEncryptedContentTrait;
+    use \Stecman\Passnote\Object\ReadableEncryptedContentTrait;
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
+    use \Stecman\Passnote\Object\FormatPropertyTrait;
 
     const OLDER_VERSION = 'older';
     const NEWER_VERSION = 'newer';
 
-    /**
-     *
-     * @var integer
-     */
     public $id;
 
     /**
@@ -29,13 +27,6 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
      * @var string
      */
     public $checksum;
-
-    /**
-     * Whether $content should be considered as binary or text
-     *
-     * @var boolean
-     */
-    public $isBinary = false;
 
     public function initialize()
     {

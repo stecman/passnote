@@ -5,7 +5,7 @@ namespace Stecman\Passnote;
 
 
 use Phalcon\Mvc\User\Component;
-use Phalcon\Session\AdapterInterface as SessionAdapter;
+use Stecman\Passnote\Object\ReadableEncryptedContent;
 
 class AccountKeyService extends Component
 {

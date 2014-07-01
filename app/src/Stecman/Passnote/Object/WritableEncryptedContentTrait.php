@@ -1,7 +1,9 @@
 <?php
 
 
-namespace Stecman\Passnote;
+namespace Stecman\Passnote\Object;
+
+use Stecman\Passnote\Encryptor;
 
 trait WritableEncryptedContentTrait
 {

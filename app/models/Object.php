@@ -1,12 +1,14 @@
 <?php
 
 
-use Stecman\Passnote\ReadableEncryptedContent;
+use Stecman\Passnote\Object\ReadableEncryptedContent;
+use Stecman\Passnote\Object\Renderable;
 
-class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent
+class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Renderable
 {
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
-    use \Stecman\Passnote\WritableEncryptedContentTrait;
+    use \Stecman\Passnote\Object\FormatPropertyTrait;
+    use \Stecman\Passnote\Object\WritableEncryptedContentTrait;
 
     public $id;
      
@@ -46,13 +48,6 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent
      * @var integer
      */
     public $parent_id;
-     
-    /**
-     * Whether $content should be considered as binary or text
-     *
-     * @var boolean
-     */
-    public $isBinary = false;
 
     /**
      * SHA1 hash of the unencrypted content
@@ -107,7 +102,7 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent
     {
         $version->setEncryptionKey($this->encryptionKey, $this->encryptionKeyIv);
         $version->setEncryptedContent($this->content);
-        $version->isBinary = $this->isBinary;
+        $version->setFormat($this->format);
         $version->checksum = $this->checksum;
 
         return $version;
@@ -150,7 +145,10 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent
         }
 
         // Length of blub that will fit inside $this->key
-        $length = min( \Stecman\Passnote\Encryptor::MAX_KEY_SIZE, $key->getMaxMessageSize() );
+        $length = min(
+            \Stecman\Passnote\Encryptor::MAX_KEY_SIZE,
+            $key->getMaxMessageSize()
+        );
 
         return openssl_random_pseudo_bytes($length);
     }

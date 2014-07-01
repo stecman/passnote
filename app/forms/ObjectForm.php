@@ -20,11 +20,13 @@ class ObjectForm extends \Phalcon\Forms\Form
     public function initialize()
     {
         $keyMap = $this->getUserKeys();
+        $rendererMap = $this->di->get('renderer')->getRendererNameMap();
 
         $this->add($title = new Text('title'));
         $this->add(new Text('description'));
         $this->add($body = new TextArea('body'));
         $this->add($key = new \Phalcon\Forms\Element\Select('key_id', $keyMap));
+        $this->add($format = new \Phalcon\Forms\Element\Select('format', $rendererMap));
         
         $title->addValidator(new \Phalcon\Validation\Validator\PresenceOf([
             'message' => 'Title is required'
@@ -37,6 +39,11 @@ class ObjectForm extends \Phalcon\Forms\Form
         $key->addValidator(new \Phalcon\Validation\Validator\InclusionIn([
             'message' => 'Encryption key is required',
             'domain' => array_keys( $keyMap )
+        ]));
+
+        $format->addValidator(new \Phalcon\Validation\Validator\InclusionIn([
+            'message' => 'Format is required',
+            'domain' => array_keys( $rendererMap )
         ]));
     }
 
@@ -63,6 +70,7 @@ class ObjectForm extends \Phalcon\Forms\Form
         $object->user = $this->user;
         $object->title = $this->request->getPost('title');
         $object->description = $this->request->getPost('description');
+        $object->setFormat( $this->request->getPost('format') );
         $object->setContent( $this->request->getPost('body') );
 
         $object->save();

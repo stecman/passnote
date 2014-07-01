@@ -1,9 +1,10 @@
 <?php
 
 
-namespace Stecman\Passnote;
+namespace Stecman\Passnote\Object;
 
 use RuntimeException;
+use Stecman\Passnote\Encryptor;
 
 trait ReadableEncryptedContentTrait
 {
