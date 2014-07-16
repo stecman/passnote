@@ -10,7 +10,9 @@ use Phalcon\Session\Adapter\Files as SessionAdapter;
 /**
  * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
  */
-$di = new FactoryDefault();
+if (!isset($di)) {
+    $di = new FactoryDefault();
+}
 
 /**
  * Raven PHP - logger for Sentry

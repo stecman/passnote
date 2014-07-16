@@ -23,13 +23,9 @@ if (class_exists('Whoops\Run')) {
     $whoops->register();
 }
 
-// DI
-$di = new CliDI();
-
 // Load the configuration file (if any)
 if(is_readable(APPLICATION_PATH . '/config/config.php')) {
     $config = include APPLICATION_PATH . '/config/config.php';
-    $di->set('config', $config);
 }
 
 // Load the loader
@@ -45,3 +41,8 @@ if(is_readable(APPLICATION_PATH . '/config/loader.php')) {
 
     $loader->register();
 }
+
+// DI
+$di = new CliDI();
+
+require __DIR__ . '/services.php';
