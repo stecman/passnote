@@ -5,7 +5,6 @@ use Phalcon\Mvc\View;
 use Phalcon\Mvc\Url as UrlResolver;
 use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
 use Phalcon\Mvc\View\Engine\Volt as VoltEngine;
-use Phalcon\Mvc\Model\Metadata\Memory as MetaDataAdapter;
 use Phalcon\Session\Adapter\Files as SessionAdapter;
 
 /**
@@ -88,6 +87,34 @@ $di->set('view', function () use ($config) {
 }, true);
 
 /**
+ * View cache component
+ */
+$di->set('viewCache', function() {
+    $frontend = new \Phalcon\Cache\Frontend\Output();
+
+    if (extension_loaded('apc')) {
+        $cache = new \Phalcon\Cache\Backend\Apc($frontend);
+    } else {
+        $cache = new \Phalcon\Cache\Backend\File($frontend);
+    }
+
+    return $cache;
+});
+
+/**
+ * If the configuration specify the use of metadata adapter use it or use memory otherwise
+ */
+$di->set('modelsMetadata', function() {
+    if (DEV_MODE) {
+        return new \Phalcon\Mvc\Model\MetaData\Memory();
+    } else if (extension_loaded('apc')) {
+        return new \Phalcon\Mvc\Model\MetaData\Apc();
+    } else {
+        return new \Phalcon\Mvc\Model\MetaData\Files();
+    }
+});
+
+/**
  * Database connection is created based in the parameters defined in the configuration file
  */
 $di->set('db', function () use ($config) {
@@ -107,13 +134,6 @@ $di->setShared('renderer', function() use ($config) {
     }
 
     return $renderService;
-});
-
-/**
- * If the configuration specify the use of metadata adapter use it or use memory otherwise
- */
-$di->set('modelsMetadata', function () {
-    return new MetaDataAdapter();
 });
 
 /**
