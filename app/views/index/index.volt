@@ -2,7 +2,7 @@
 
 <div class="row">
 	<div class="col-md-12 obj-list">
-		{% for object in objects.getPaginate().items %}
+		{% for object in objects %}
 		<a href="/object/{{ object.id | escape_attr }}">
 			<h2 class="title">{{ object.title | e }}</h2>
 			<p class="meta">

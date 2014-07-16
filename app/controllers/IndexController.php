@@ -5,16 +5,13 @@ class IndexController extends ControllerBase
 
     public function indexAction()
     {
-        $paginatedObjects = new Phalcon\Paginator\Adapter\QueryBuilder([
-            'builder' => $this->getObjectQuery(),
-            'limit' => 20,
-            'page' => 1
-        ]);
+        $objects = $this->getObjectQuery();
+        $searchTerm = trim($this->request->getPost('query'));
 
         $this->view->setLayout('app');
-        $this->view->setVar('objects', $paginatedObjects);
+        $this->view->setVar('objects', $objects->getQuery()->execute());
         $this->view->setVar('search_autofocus', true);
-        $this->view->setVar('search_term', trim($this->request->getPost('query')));
+        $this->view->setVar('search_term', $searchTerm);
     }
 
     public function errorAction($message = 'Not found')
@@ -31,6 +28,7 @@ class IndexController extends ControllerBase
     {
         $query = $this->modelsManager->createBuilder();
         $query->addFrom('Object');
+        $query->orderBy('created DESC');
         $query->where('user_id = :user_id: AND parent_id IS NULL', [
             'user_id' => Security::getCurrentUserId()
         ]);
