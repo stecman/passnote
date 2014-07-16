@@ -7,7 +7,7 @@ try {
 
 
     /**
-     * Use composer autoloader
+     * Use Composer's autoloader
      */
     if (!file_exists($composerAutoload = __DIR__ . '/../vendor/autoload.php')) {
         header('HTTP/1.1 500');
@@ -31,6 +31,13 @@ try {
      * Read services
      */
     include __DIR__ . "/../app/config/services.php";
+
+    /**
+     * Allow running with PHP's built-in web server
+     */
+    if (!isset($_GET['_url'])) {
+        $_GET['_url'] = $_SERVER['REQUEST_URI'];
+    }
 
     /**
      * Handle the request
