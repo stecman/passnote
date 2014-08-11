@@ -11,11 +11,11 @@
 
 		<input type="hidden" value="{{ security.getToken() }}" name="{{ security.getTokenKey() }}">
 
-		{{ form.render('user', ['placeholder':'Email', 'autofocus': true, 'autocomplete': 'off']) }}
+		<input type="email" name="user" placeholder="Email" autofocus autocomplete="off" required>
+	
+		<input type="password" name="password" placeholder="Password" required>
 
-		{{ form.render('password', ['placeholder':'Password']) }}
-
-		{{ form.render('token', ['placeholder':'Token', 'autocomplete': 'off']) }}
+		<input type="number" name="token" placeholder="Token" autocomplete="off" pattern="[0-9]*" required>
 
 		<input type="submit" value="Log in">
 

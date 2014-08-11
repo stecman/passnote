@@ -13,7 +13,7 @@ class AuthController extends ControllerBase
     public function loginAction()
     {
         $form = new \Phalcon\Forms\Form();
-        $form->add($user = new \Phalcon\Forms\Element\Text('user'));
+        $form->add($user = new \Phalcon\Forms\Element\Email('user'));
         $form->add($pass = new \Phalcon\Forms\Element\Password('password'));
         $form->add($twoFactorAuth = new \Phalcon\Forms\Element\Numeric('token'));
 
