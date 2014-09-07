@@ -33,7 +33,7 @@ $di->set('raven', function() use ($config) {
  * Dev mode is enabled when the environment variable DEV_MODE is set.
  */
 
-if (DEV_MODE) {
+if (DEV_MODE && PHP_SAPI !== 'cli') {
     ini_set('display_errors', true);
     ini_set('html_errors', true);
     new \Whoops\Provider\Phalcon\WhoopsServiceProvider($di);
