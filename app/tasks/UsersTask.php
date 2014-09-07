@@ -128,8 +128,10 @@ class UsersTask extends BaseTask
             $newPassword = $this->promptCreatePassword(true);
             $user->changePassword($oldPassword, $newPassword);
 
-            $user->accountKey->save();
+            $this->db->begin();
+            $user->getAccountKey()->save();
             $user->save();
+            $this->db->commit();
 
             echo "Password updated.\n";
         } else {

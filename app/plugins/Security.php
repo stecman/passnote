@@ -5,6 +5,7 @@ use Phalcon\Mvc\Dispatcher;
 class Security extends \Phalcon\Mvc\User\Plugin
 {
     const SESSION_USER_ID = 'sec-user';
+    const SESSION_KEY = 'sec-session-key';
 
     /**
      * @return \User
@@ -30,9 +31,15 @@ class Security extends \Phalcon\Mvc\User\Plugin
     public function beforeDispatch(\Phalcon\Events\Event $event, Dispatcher $dispatcher)
     {
         $id = $this->session->get(self::SESSION_USER_ID);
+        $sessionKey = $this->session->get(self::SESSION_KEY);
         $user = $this->getCurrentUser();
 
         if ($id && $user) {
+            if (!$user->validateSessionKey($sessionKey)) {
+                $this->session->destroy();
+                $this->response->redirect('');
+                return false;
+            }
             // Allow access when logged in
 
         } else if ($dispatcher->getHandlerClass() === 'AuthController' && $dispatcher->getActionName() === 'login') {

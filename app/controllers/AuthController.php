@@ -90,6 +90,7 @@ class AuthController extends ControllerBase
             $keyService->unlockAccountKeyForSession($user, $data['password']);
 
             $this->session->set(Security::SESSION_USER_ID, $user->id);
+            $this->session->set(Security::SESSION_KEY, $user->getSessionKey());
             session_regenerate_id();
             $this->response->redirect('');
         } else {

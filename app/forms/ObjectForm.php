@@ -27,6 +27,8 @@ class ObjectForm extends \Phalcon\Forms\Form
         $this->add($body = new TextArea('body'));
         $this->add($key = new \Phalcon\Forms\Element\Select('key_id', $keyMap));
         $this->add($format = new \Phalcon\Forms\Element\Select('format', $rendererMap));
+
+        $key->setDefault($this->user->accountKey_id);
         
         $title->addValidator(new \Phalcon\Validation\Validator\PresenceOf([
             'message' => 'Title is required'

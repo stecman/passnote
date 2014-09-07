@@ -139,15 +139,18 @@ class User extends \Phalcon\Mvc\Model
         ]);
 
         $this->hasMany('id', 'Key', 'user_id', [
-            'alias' => 'Keys'
+            'alias' => 'Keys',
+            'reusable' => true
         ]);
 
         $this->hasMany('id', 'Object', 'user_id', [
-            'alias' => 'Objects'
+            'alias' => 'Objects',
+            'reusable' => true
         ]);
 
         $this->belongsTo('accountKey_id', 'Key', 'id', [
-            'alias' => 'AccountKey'
+            'alias' => 'AccountKey',
+            'reusable' => true
         ]);
     }
 
@@ -258,6 +261,7 @@ class User extends \Phalcon\Mvc\Model
         $this->setPassword($newPassword);
         $this->recryptOtpKey($oldPassword, $newPassword);
         $this->recryptAccountKey($oldPassword, $newPassword);
+        $this->regenerateSessionKey();
     }
 
     /**
