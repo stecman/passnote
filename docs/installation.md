@@ -5,7 +5,7 @@ This file contains a brief overview of how to get Passnote running. This may be 
 
 ## Initial setup
 
-Install the Phalcon PHP extension at v1.3.2. [The Phalcon docs contain installation instructions](http://docs.phalconphp.com/en/latest/reference/install.html). You can confirm installation by running:
+**Install the Phalcon PHP extension** at v1.3.2. [The Phalcon docs contain installation instructions](http://docs.phalconphp.com/en/latest/reference/install.html). You can confirm installation by running:
 
     php -m | grep phalcon
 
@@ -13,16 +13,16 @@ or
 
     php -r 'echo extension_loaded("phalcon") ? "Phalcon " . phpversion("phalcon") . " is installed.\n"  : "Phalcon not installed.\n";'
 
-Get the code
+**Get the code**
 
     git clone git@github.com:stecman/passnote.git
     cd passnote/
 
-Install remaining dependencies
+**Install remaining dependencies**
 
     composer install
 
-Create a database and import the Passnote schema
+**Create a database and import the Passnote schema**
 
     # Login and run the query "CREATE DATABASE passnote", then:
     mysql -u root -p passnote < docs/mysql/schema.sql
