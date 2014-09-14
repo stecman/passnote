@@ -8,19 +8,6 @@
 <link rel="icon shortcut" href="/favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="/img/mobius-256.png" />
 
-{#
-<script src="/components/requirejs/require.js"></script>
-<script src="/js/amd.config.js"></script>
-<script>
-	requirejs.config( {
-		baseUrl: '/js',
-		waitSeconds: 20
-	} );
-
-	require(["passnote"])
-</script>
-#}
-
 </head>
 
 <body>
