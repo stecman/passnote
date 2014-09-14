@@ -22,35 +22,9 @@ Additionally, to build and develop the interface components, you'll need:
 
 To build the CSS, you'll need to run `make less` in the project root.
 
-### Config
+[See docs/installation.md for step by step installation instructions](docs/installation.md)
 
-You can override master config values from `app/config/config.php` by placing a `config.php` file in the root of the install. This file should return an array to be merged over the master config. You can also use this file to set up your environment. Eg:
-
-
-```php
-error_reporting(E_ALL);
-
-define('DEV_MODE', true);
-
-return [
-    'database' => [
-        'host'        => 'localhost',
-        'username'    => 'root',
-        'password'    => '',
-        'dbname'      => 'passnote',
-    ]
-];
-```
-
-### Creating an account
-
-Once you've got the project running, you can create an account using the application's console:
-
-    $ ./bin/task.php users create you@example.com
-
-This will prompt for an account password, then generate an account key and an TOTP key URL. Currently there is no option to not use a one-time-password with an account. You can use an app like [Google Authenticator](https://support.google.com/accounts/answer/1066447) as a TOTP manager.
-
-## Roadmap
+## Road map
 
 Passnote is still in development and not all core features are implemented yet.
 
