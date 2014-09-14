@@ -30,7 +30,7 @@ CREATE TABLE `key` (
   `user_id` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -68,13 +68,13 @@ CREATE TABLE `user` (
   `password` varchar(255) DEFAULT NULL,
   `otpKey` blob,
   `otpIv` blob,
-  `defaultKey_id` int(11) DEFAULT NULL,
+  `accountKey_id` int(11) DEFAULT NULL,
   `sessionKey` tinyblob NOT NULL,
-  `defaultKeyPhrase` blob,
-  `defaultKeyIv` blob,
+  `accountKeyPhrase` blob,
+  `accountKeyIv` blob,
   PRIMARY KEY (`id`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
