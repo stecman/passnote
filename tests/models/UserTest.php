@@ -51,12 +51,13 @@ class UserTest extends PHPUnit_Framework_TestCase
 
         $user->regenerateSessionKey();
         $this->assertNotEquals($key, $user->getSessionKey());
+        $this->assertFalse($user->validateSessionKey($key));
     }
 
     public function testRecryptDefaultKey()
     {
         $password = 'test';
-        $secondPassword = 'another-password';
+        $newPassword = 'another-password';
         $data = openssl_random_pseudo_bytes(64);
 
         $user = new User();
@@ -65,8 +66,8 @@ class UserTest extends PHPUnit_Framework_TestCase
         $key = $user->accountKey = Key::generate($passphrase);
         $encrypted = $key->encrypt($data);
 
-        $user->recryptAccountKey($password, $secondPassword);
-        $passphrase = $user->getAccountKeyPassphrase($secondPassword);
+        $user->recryptAccountKey($password, $newPassword);
+        $passphrase = $user->getAccountKeyPassphrase($newPassword);
 
         $decrypted = $key->decrypt($encrypted, $passphrase);
 
@@ -93,7 +94,7 @@ class UserTest extends PHPUnit_Framework_TestCase
         $encryptedData = $user->getAccountKey()->encrypt($data);
 
         // Change user's password
-        // This should update the password on the default key and OTP key
+        // This must update the password on the default key and OTP key as well
         $user->changePassword($firstPassword, $secondPassword);
 
         // Decrypt data

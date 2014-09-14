@@ -197,6 +197,7 @@ class User extends \Phalcon\Mvc\Model
      * Decrypt and return the passphrase for the user's account key
      *
      * @param $password
+     * @throws RuntimeException
      * @return string
      */
     public function getAccountKeyPassphrase($password)
