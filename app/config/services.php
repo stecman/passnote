@@ -32,18 +32,19 @@ $di->set('raven', function() use ($config) {
  *
  * Dev mode is enabled when the environment variable DEV_MODE is set.
  */
-
-if (DEV_MODE && PHP_SAPI !== 'cli') {
-    ini_set('display_errors', true);
-    ini_set('html_errors', true);
-    new \Whoops\Provider\Phalcon\WhoopsServiceProvider($di);
-} else {
-    ini_set('display_errors', false);
-    ini_set('html_errors', false);
-    set_exception_handler(array(
-        new Raven_ErrorHandler($di->get('raven')),
-        'handleException'
-    ));
+if (PHP_SAPI !== 'cli') {
+    if (DEV_MODE) {
+        ini_set('display_errors', true);
+        ini_set('html_errors', true);
+        new \Whoops\Provider\Phalcon\WhoopsServiceProvider($di);
+    } else {
+        ini_set('display_errors', false);
+        ini_set('html_errors', false);
+        set_exception_handler(array(
+            new Raven_ErrorHandler($di->get('raven')),
+            'handleException'
+        ));
+    }
 }
 
 /**
