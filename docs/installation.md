@@ -60,7 +60,7 @@ To compile the CSS yourself, you'll need to first install the build tools. To do
 
     # Step 2: install dependencies and compile
     make install
-    make js
+    make less
 
 
 ## Creating an account
