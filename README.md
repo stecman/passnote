@@ -9,6 +9,7 @@ Passnote is a web application for storing secrets. It's not complete yet, but it
 To run Passnote, you'll need:
 
 * PHP >= 5.4 configured with `--with-openssl` (this is normal)
+* The PHP MCrypt extension
 * [Phalcon PHP](http://phalconphp.com/) >= 1.3.0
 * A database. The schema for MySQL is in `docs/mysql/schema.sql`, though Phalcon supports other databases
 * Composer
@@ -33,9 +34,20 @@ Passnote is still in development and not all core features are implemented yet.
 * Account settings: managing password and keys
 * Unlocking objects that use a key other than a user's account key (forms required)
 * Deleting and/or archiving objects
-* Pagination of list view / better list or search view
 
 **Planned functionality:**
 
+* Fast session expiry
+* Attachments on objects
+* Pagination of list view / better list or search view
 * Command-line interface (console)
 * Ability to share objects between users
+* Bulk key change (eg. for replacing an RSA key across all objects that use it)
+* A choice of encryption algorithms (eg. elliptic curve instead of RSA)
+
+
+## Note about security
+
+Passnote is designed to encrypt and manage data in a safer manner than storing your secrets in plain text. Data in Passnote is encrypted ¹, however the total security of the data you choose to store in Passnote is dependent on a number of external factors including the server environment it runs in and the passwords used for accounts and keys. Ideally Passnote shouldn't be exposed directly to the internet. If you're accessing Passnote over the internet it must be over an encrypted connection (eg. HTTPS, SSH tunnel). If you're serious about security, you probably want to consider not using this project at all - it's just a toy and the security knowledge of the author is limited.
+
+¹ Objects in Passnote are encrypted using 256 bit AES (MCRYPT_RIJNDAEL_256 in CBC mode) with a random 32 byte passphrase for each object. The random passphrase of each object is stored encrypted using one of a user's RSA keys, which are generated as 4096 bit by default.
