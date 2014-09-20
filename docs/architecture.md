@@ -1,4 +1,4 @@
-# Passnote Architechture
+# Passnote Architecture
 
 This document describes the relationships between data objects in Passnote, and generally how it is designed to work. I wrote this mostly because I kept getting confused about the big picture when I was implementing details.
 
