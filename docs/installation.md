@@ -87,4 +87,4 @@ You can run the application using PHP's built-in web server to get started quick
 
 Then go to `http://localhost:8000` in a browser, and (if everything worked) you should see the passnote login screen:
 
-![Passnote login screen](https://i.imgur.com/RCzRIPn.png)
+![Passnote login screen](https://i.imgur.com/vItWa7z.png)
