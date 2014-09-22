@@ -72,5 +72,16 @@ pre code {
 	float: left;
 }
 
+.h-clearfix {
+	&:before,
+	&:after {
+		content: " ";
+		display: table;
+	}
+}
+
+&:after {
+	clear: both;
+}
 
 }
