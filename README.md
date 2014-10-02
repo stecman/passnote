@@ -2,11 +2,11 @@
 
 Passnote is a web application for storing secrets. It's not complete yet, but it's in a working state. [More info on how it works.](docs/architecture.md)
 
-![Passnote list view](https://i.imgur.com/OpFPetu.png)
+![Passnote screenshot](https://i.imgur.com/OpFPetu.png)
 
 ## Installation and configuration
 
-To run Passnote, you'll need:
+[Step by step installation instructions can be found in docs/installation.md.](docs/installation.md) In general, to run Passnote you'll need:
 
 * PHP >= 5.4 configured with `--with-openssl` (this is normal)
 * The PHP MCrypt extension
@@ -22,8 +22,6 @@ Additionally, to build and develop the interface components, you'll need:
 * [Bower](http://bower.io/) to install Javascript and CSS dependencies: `bower`
 
 To build the CSS, you'll need to run `make less` in the project root.
-
-[See docs/installation.md for step by step installation instructions](docs/installation.md)
 
 ## Road map
 
