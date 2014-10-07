@@ -11,7 +11,10 @@ abstract class BaseTask extends \Phalcon\CLI\Task
         fwrite(STDIN, $prompt);
         $options = $hideInput ? '-s' : '';
         $value = trim(`bash -c 'read $options uservalue && echo \$uservalue'`);
-        fwrite(STDIN, "\n");
+
+        if ($hideInput) {
+            fwrite(STDIN, "\n");
+        }
 
         return $value !== '' ? $value : null;
     }

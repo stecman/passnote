@@ -1,18 +1,21 @@
 #!/usr/bin/env php
 <?php
 
-use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
-
 require __DIR__ . '/../app/config/cli-bootstrap.php';
 
-$di->set('db', function () use ($config) {
-    return new DbAdapter(array(
-        'host' => $config->database->host,
-        'username' => $config->database->username,
-        'password' => $config->database->password,
-        'dbname' => $config->database->dbname
-    ));
-});
+// Add tasks dir to the loader
+if(is_readable(APPLICATION_PATH . '/config/loader.php')) {
+    include APPLICATION_PATH . '/config/loader.php';
+
+    $loader->registerDirs(
+        array_merge(
+            $loader->getDirs(),
+            [APPLICATION_PATH . '/tasks']
+        )
+    );
+
+    $loader->register();
+}
 
 // define global constants for the current task and action
 define('CURRENT_TASK', (isset($argv[1]) ? $argv[1] : null));

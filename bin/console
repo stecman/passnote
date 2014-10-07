@@ -1,0 +1,167 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__ . '/../app/config/cli-bootstrap.php';
+require __DIR__ . '/../app/tasks/BaseTask.php';
+
+class ConsoleTask extends BaseTask
+{
+    /**
+     * Logged in user
+     * @var User
+     */
+    protected $user;
+
+    /**
+     * Passphrase for the logged in user's account key
+     * @var string
+     */
+    protected $accountKeyPassphrase;
+
+    public function run()
+    {
+        $email = $this->promptInput('User: ');
+
+        /** @var User $user */
+        $user = User::findFirst([
+            'email = :email:',
+            'bind' => [
+                'email' => $email
+            ]
+        ]);
+        
+        if ($user) {
+            $password = $this->promptInput('Password: ', true);
+
+            if (!$user->validatePassword( $password )) {
+                die("Password incorrect\n");
+            }
+
+            $this->user = $user;
+            $this->accountKeyPassphrase = $user->getAccountKeyPassphrase($password);
+            $this->startConsole();
+        } else {
+            die("No user found for $email\n");
+        }
+    }
+
+    protected function startConsole()
+    {
+        while (true) {
+            $search = $this->promptInput('Search: ');
+            $results = $this->searchRecords($search);
+
+            if (!count($results)) {
+                echo "No records found\n";
+                continue;
+            }
+
+            echo "\nSelect a record to show (or enter nothing to search again):\n\n";
+
+            foreach ($results as $index => $object) {
+                echo sprintf("    [%d] %s\n", $index, $object->title);
+            }
+
+            $selection = $this->promptInput("\nItem to display: ");
+
+            if ($selection === '') {
+                continue;
+            }
+
+            $this->showObject($results[(int) $selection]);
+        }
+    }
+
+    /**
+     * Search the title and description of objects, returning the first 10 matches
+     */
+    protected function searchRecords($search)
+    {
+        $search = trim($search);
+
+        $query = Object::query()
+            ->limit(10)
+            ->orderBy('created DESC')
+            ->where('user_id = :user_id: AND parent_id IS NULL', [
+                'user_id' => $this->user->id
+            ]);
+
+        // Crude search for each term using LIKE
+        foreach (explode(' ', $search) as $term) {
+            $query->andWhere('title LIKE :term: OR description LIKE :term:', [
+                'term' => "%$term%"
+            ]);
+        }
+
+        $results = $query->execute();
+        $array = [];
+
+        foreach ($results as $result) {
+            $array[] = $result;
+        }
+
+        return $array;
+    }
+
+    /**
+     * Decrypt and show the contents of an object
+     */
+    protected function showObject(Object $object)
+    {
+        if ($object->getKeyId() === $this->user->accountKey_id) {
+            $content = $object->getContent($this->accountKeyPassphrase);
+        } else {
+            echo "Sorry, non-account key objects not implemented here yet\n";
+        }
+
+        $format = <<<EOD
+Title: %s
+Description: %s
+Last Modified: %s
+
+---
+
+%s
+EOD;
+        $this->display(
+            sprintf(
+                $format,
+                $object->title,
+                $object->description,
+                $object->getDateCreated(),
+                $content
+            )
+        );
+    }
+
+    /**
+     * Display a string in the program 'less'
+     */
+    protected function display($string)
+    {
+        $spec = [
+            ['pipe', 'r'],
+            STDOUT,
+            STDERR
+        ];
+
+        $process = proc_open('less', $spec, $pipes);
+        fwrite($pipes[0], $string);
+        fclose($pipes[0]);
+
+        while (true) {
+            $status = proc_get_status($process);
+            if (!$status['running']) {
+                break;
+            }
+
+            usleep(5000);
+        }
+
+        proc_close($process);
+    }
+}
+
+$console = new ConsoleTask();
+$console->setDi($di);
+$console->run();
