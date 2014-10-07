@@ -39,6 +39,8 @@ class ConsoleTask extends BaseTask
 
             $this->user = $user;
             $this->accountKeyPassphrase = $user->getAccountKeyPassphrase($password);
+            unset($password);
+
             $this->startConsole();
         } else {
             die("No user found for $email\n");
@@ -49,6 +51,11 @@ class ConsoleTask extends BaseTask
     {
         while (true) {
             $search = $this->promptInput('Search: ');
+
+            if ($search === null) {
+                exit(0);
+            }
+
             $results = $this->searchRecords($search);
 
             if (!count($results)) {
@@ -64,7 +71,7 @@ class ConsoleTask extends BaseTask
 
             $selection = $this->promptInput("\nItem to display: ");
 
-            if ($selection === '') {
+            if ($selection === null) {
                 continue;
             }
 
@@ -155,7 +162,7 @@ EOD;
                 break;
             }
 
-            usleep(5000);
+            usleep(500000);
         }
 
         proc_close($process);
