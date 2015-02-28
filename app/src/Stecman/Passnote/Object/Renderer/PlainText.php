@@ -20,6 +20,6 @@ class PlainText implements RendererInterface
 
     public function getName()
     {
-        return 'Plain text';
+        return 'Text';
     }
 }
