@@ -3,4 +3,5 @@
 <p><span class="date" title="{{ object.getDateCreated('j M Y, g:ia') }}">{{ object.getDateCreated('j M Y') }}</span></p>
 <hr/>
 
+{{ content() }}
 {{ renderer.render(object, decrypted_content) }}

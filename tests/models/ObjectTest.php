@@ -16,28 +16,38 @@ class ObjectTest extends PHPUnit_Framework_TestCase
         $this->object->key = Key::generate(self::KEY_PASSPHRASE, 386);
     }
 
-    public function testSetContent()
+    public function testSetGetContent()
     {
         $content = 'I am a glorious horse!';
-
         $this->object->setContent($content);
-
         $this->assertEquals($content, $this->object->getContent(self::KEY_PASSPHRASE));
     }
 
     public function testChecksum()
     {
         $content = openssl_random_pseudo_bytes(1024);
-
         $this->object->setContent($content);
-        $firstRunChecksum = $this->object->checksum;
-        $this->assertNotEmpty($this->object->checksum);
 
-        $this->object->setContent($content);
-        $this->assertEquals($firstRunChecksum, $this->object->checksum);
-
-        $this->object->setContent($content.'abc');
-        $this->assertNotEquals($firstRunChecksum, $this->object->checksum);
+        $decrypted = $this->object->getContent(self::KEY_PASSPHRASE);
+        $this->assertEquals($content, $decrypted);
+        $this->assertTrue($this->object->isChecksumValid($decrypted, self::KEY_PASSPHRASE));
     }
 
+    public function testCopyToVersion()
+    {
+        $content = 'Harry the seagull bides his time.';
+
+        $this->object->setContent($content);
+        $version = ObjectVersion::versionFromObject($this->object);
+
+        $this->assertEquals(
+            $content,
+            $version->getContent(self::KEY_PASSPHRASE)
+        );
+
+        $this->assertEquals(
+            $this->object->getContent(self::KEY_PASSPHRASE),
+            $version->getContent(self::KEY_PASSPHRASE)
+        );
+    }
 }

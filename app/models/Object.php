@@ -49,13 +49,6 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
      */
     public $parent_id;
 
-    /**
-     * SHA1 hash of the unencrypted content
-     *
-     * @var string
-     */
-    public $checksum;
-
     public function initialize()
     {
         $this->useDynamicUpdate(true);
@@ -100,10 +93,10 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
      */
     public function copyStateToVersion(ObjectVersion $version)
     {
-        $version->setEncryptionKey($this->encryptionKey, $this->encryptionKeyIv);
+        $version->setEncryptedSessionKey($this->sessionKey, $this->sessionKeyIv);
         $version->setEncryptedContent($this->content);
+        $version->setEncryptedChecksum($this->checksum);
         $version->setFormat($this->format);
-        $version->checksum = $this->checksum;
 
         return $version;
     }
@@ -122,11 +115,8 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
     protected function saveVersion()
     {
         $previous = self::findFirst($this->id);
-
-        if ($previous && $previous->checksum !== $this->checksum) {
-            $version = ObjectVersion::versionFromObject($previous);
-            $version->create();
-        }
+        $version = ObjectVersion::versionFromObject($previous);
+        $version->create();
     }
 
     /**
@@ -135,7 +125,7 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
      * @throws RuntimeException
      * @return string - plain text encryption key
      */
-    protected function generateEncryptionKey()
+    protected function generateSessionKey()
     {
         /** @var \Key $key */
         $key = $this->key;
@@ -144,13 +134,20 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
             throw new \RuntimeException("Object {$this->id} has no related key");
         }
 
-        // Length of blub that will fit inside $this->key
+        // Length of session key that will fit inside $this->key
         $length = min(
-            \Stecman\Passnote\Encryptor::MAX_KEY_SIZE,
+            $this->getEncryptor()->getKeySize(),
             $key->getMaxMessageSize()
         );
 
         return openssl_random_pseudo_bytes($length);
     }
 
+    /**
+     * @return \Stecman\Passnote\Encryptor
+     */
+    protected function getEncryptor()
+    {
+        return $this->getDI()->get('encryptor');
+    }
 }

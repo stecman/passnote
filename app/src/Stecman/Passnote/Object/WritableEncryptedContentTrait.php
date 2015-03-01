@@ -3,11 +3,16 @@
 
 namespace Stecman\Passnote\Object;
 
-use Stecman\Passnote\Encryptor;
-
 trait WritableEncryptedContentTrait
 {
     use ReadableEncryptedContentTrait;
+
+    /**
+     * Generate a new random string to encrypt content with
+     *
+     * @return string - plain text encryption key
+     */
+    abstract protected function generateSessionKey();
 
     /**
      * Set the plain-text content of this object
@@ -18,17 +23,17 @@ trait WritableEncryptedContentTrait
      */
     public function setContent($plainText)
     {
-        $crypt = new Encryptor();
-        $blub = $this->generateEncryptionKey();
-        $iv = $crypt->genIv();
+        $crypt = $this->getEncryptor();
 
-        $this->setEncryptionKey($blub);
-        $this->checksum = sha1($plainText);
-        $this->encryptionKeyIv = $iv;
-        $this->content = $crypt->encrypt($plainText, $blub, $iv);
+        $sessionKey = $this->generateSessionKey();
+        $this->setSessionKey($sessionKey);
+        $this->sessionKeyIv = $crypt->genIv();
+
+        $this->content = $crypt->encrypt($plainText, $sessionKey, $this->sessionKeyIv);
+        $this->storeChecksum($plainText, $sessionKey);
     }
 
-    protected function setEncryptionKey($string)
+    protected function setSessionKey($string)
     {
         /** @var \Key $key */
         $key = $this->key;
@@ -37,6 +42,6 @@ trait WritableEncryptedContentTrait
             throw new \RuntimeException("Object {$this->id} has no related key");
         }
 
-        $this->encryptionKey = $key->encrypt($string);
+        $this->sessionKey = $key->encrypt($string);
     }
 } 

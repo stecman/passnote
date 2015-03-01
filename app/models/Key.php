@@ -22,6 +22,10 @@ class Key extends \Phalcon\Mvc\Model
     protected $private_key;
 
     protected $encrypted;
+
+    protected $kdf_salt;
+
+    protected $kdf_iterations;
      
     /**
      * User who owns this key
@@ -74,10 +78,14 @@ class Key extends \Phalcon\Mvc\Model
     public function changePassphrase($oldPassphrase, $newPassphrase)
     {
         // Ensure the passphrase is null for a non-encrypted key
-        $passphrase = $this->isEncrypted() ? $oldPassphrase : null;
+        $oldPassphrase = $this->isEncrypted() ? $oldPassphrase : null;
 
-        if (!$privateKey = openssl_pkey_get_private($this->private_key, $passphrase)) {
-            throw new \Stecman\Passnote\KeyException('Could not open private key. Wrong passphrase?');
+        if ($oldPassphrase !== null) {
+            $oldPassphrase = $this->getDerivedKey($oldPassphrase);
+        }
+
+        if (!$privateKey = openssl_pkey_get_private($this->private_key, $oldPassphrase)) {
+            throw new \Stecman\Passnote\KeyException('Could not open private key. Wrong passphrase? ' . openssl_error_string());
         }
 
         self::storeRsaOnKey($this, $privateKey, $newPassphrase);
@@ -121,13 +129,17 @@ class Key extends \Phalcon\Mvc\Model
      * @throws Stecman\Passnote\CryptException
      * @return string
      */
-    public function decrypt($data, $passphrase=null)
+    public function decrypt($data, $passphrase = null)
     {
         // Ensure the passphrase is null for a non-encrypted key
         $passphrase = $this->isEncrypted() ? $passphrase : null;
 
+        if ($passphrase !== null) {
+            $passphrase = $this->getDerivedKey($passphrase);
+        }
+
         if (!$privateKey = openssl_pkey_get_private($this->private_key, $passphrase)) {
-            throw new \Stecman\Passnote\KeyException('Could not open private key. Wrong passphrase?');
+            throw new \Stecman\Passnote\KeyException('Could not open private key. Wrong passphrase? ' . openssl_error_string());
         }
         $decrypted = null;
 
@@ -147,6 +159,11 @@ class Key extends \Phalcon\Mvc\Model
         return strpos($firstLine, 'ENCRYPTED PRIVATE KEY') !== false;
     }
 
+    /**
+     * Get the maximum number of bytes that this key can encrypt
+     *
+     * @return int
+     */
     public function getMaxMessageSize()
     {
         $publicKey = openssl_pkey_get_public($this->public_key);
@@ -155,6 +172,25 @@ class Key extends \Phalcon\Mvc\Model
         openssl_free_key($publicKey);
 
         return $maxBytes;
+    }
+
+    /**
+     * Using the stored key derivation properties, derive a key from a passphrase
+     *
+     * @param string $passphrase
+     * @return string
+     */
+    protected function getDerivedKey($passphrase)
+    {
+        $crypt = \Phalcon\DI::getDefault()->get('encryptor');
+
+        if ($this->kdf_salt !== null) {
+            $derivedKey = $crypt->deriveKey($passphrase, $this->kdf_salt, $crypt->getKeySize(), $this->kdf_iterations);
+        } else {
+            $derivedKey = $passphrase;
+        }
+
+        return $derivedKey;
     }
 
     /**
@@ -167,8 +203,20 @@ class Key extends \Phalcon\Mvc\Model
     protected static function storeRsaOnKey(Key $key, $privateKey, $passphrase)
     {
         $privateStr = null;
+        $crypt = \Phalcon\DI::getDefault()->get('encryptor');
 
-        openssl_pkey_export($privateKey, $privateStr, $passphrase, [
+        // Perform key derivation
+        if ($passphrase !== null) {
+            $key->kdf_salt = openssl_random_pseudo_bytes(32);
+            $key->kdf_iterations = $crypt->getKdfIterations();
+            $derivedKey = $crypt->deriveKey($passphrase, $key->kdf_salt, $crypt->getKeySize());
+        } else {
+            $key->kdf_salt = null;
+            $key->kdf_iterations = null;
+            $derivedKey = null;
+        }
+
+        openssl_pkey_export($privateKey, $privateStr, $derivedKey, [
             'encrypt_key' => true,
             'encrypt_key_cipher' => OPENSSL_CIPHER_AES_256_CBC
         ]);

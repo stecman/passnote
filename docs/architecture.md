@@ -1,7 +1,6 @@
 # Passnote Architecture
 
-This document describes the relationships between data objects in Passnote, and generally how it is designed to work. I wrote this mostly because I kept getting confused about the big picture when I was implementing details.
-
+This document describes the relationships between data objects in Passnote, and generally how it is designed to work.
 
 ## Purpose
 
@@ -12,44 +11,42 @@ Passnote is designed for storing private data in a reasonably safe way, and maki
 
 ### User
 
-The owner of Objects and Keys. Most probably a person. Every user must have at least one Key, with one Key designated as their *Account Key*.
+An owner of Objects and Keys. Most probably a person. Every user must have at least one Key, with one Key designated as their *Account Key*.
 
 ### Key
 
-An RSA key pair used when encrypting and decrypting an Object. Encrypted using a password decided by the user. As the payload size of RSA is limited by key size, Keys are not used directly to encrypt data; the Key is used to encrypt/decrypt a random passphrase which we'll call a *Blub*. To view an object, the password for the associated Key must be entered at the time of access.
-
-### Blub
-
-A random string of bytes used as the passphrase for symmetrically encrypting the data in an Object. Each Object has its own Blub. The Blub is not known to the user and is stored encrypted (by a Key) in the database along with the Object it encrypted.
-
-A Blub is really an 'encryption key' or 'object passphrase'. The term 'blub' has been used to avoid ambiguity or confusion, as the words 'key', 'passphrase' and 'password' are already used to identify other components.
-
-### Object
-
-A piece of encrypted data (a secret). An object is encrypted symmetrically with a *blub* as the passphrase.
-
-### Object Version
-
-An historic version of an Object. Belongs to an Object and is encrypted using the same key as that Object (the 'master'). Object Versions cannot be changed.
+An RSA key pair used in the process of encrypting and decrypting an Object. The private key is encrypted using a password decided by the user. As the maximum payload that can be encrypted using RSA is limited by key size, Keys are not used directly to encrypt data; a Key is used to encrypt/decrypt a random passphrase which we'll call a *session key*. To view an object, the password for the associated Key must be entered at the time of access.
 
 ### Account Key
 
-A Key that is implicitly unlocked for a session when a user logins in, instead of requiring a password to unlock upon accessing an Object. The user doesn't know the actual password for their Account Key as it is managed automatically, but it can be indirectly unlocked using their account password. This is intended to provide a compromise between security and ease of access.
+A Key that is implicitly unlocked for a session when a user logins in, instead of requiring a password to unlock when accessing an Object. The user doesn't know the actual password for their Account Key as it is managed automatically, but it can be indirectly unlocked using their account password. This is intended to provide a compromise between security and ease of access.
+
+### Session key
+
+A random string of bytes used as the passphrase for symmetrically encrypting the data in an Object. Each Object has its own session key. The session key is not known to the user and is stored encrypted (by a Key) in the database along with the Object it encrypted.
+
+### Object
+
+A piece of encrypted data (a secret). An object is encrypted symmetrically with a *session key* as the passphrase.
+
+### Object Version
+
+An old version of an Object. Belongs to an Object and is encrypted using the same key as that Object (the 'master'). Object Versions cannot be changed.
 
 
 ## Process overview
 
-* An Object needs a Blub to be decrypted
-* A Blub needs a Key to be decrypted
+* An Object needs a session key to be decrypted
+* A session key needs a Key to be decrypted
 * A Key needs a password to be decrypted
 
 ### Encryption
 
 1. User submits plain-text data and specifies a Key to encrypt with.
-2. A Blub of the maximum length for the Key is generated.
-3. The User's plain-text data is encrypted using AES with the Blub as the passphrase for encryption.
-4. The Blub is encrypted using the public side of the Key
-5. The encrypted Blub and data are stored in the database in an Object record
+2. A session key of the maximum length supported by the symmetric encryption algorithm is generated.
+3. The User's plain-text data is encrypted using AES with the session key.
+4. The session key is encrypted using the public portion of the Key
+5. The encrypted session key and data are stored in the database in an Object record
 
 Things of note:
 
@@ -59,8 +56,8 @@ Things of note:
 
 1. User requests the contents of an Object and provides the password for the Key associated with that Object
 2. The password is used to unlock the Key
-3. The Key is used to decrypt the Object's Blub
-4. The Object content is decrypted using the Blub and sent back to the user
+3. The Key is used to decrypt the Object's session key
+4. The Object content is decrypted using the session key and sent back to the user
 
 In the case the User is using their Account Key, a password would not be sent with the request for content. Instead, step 2 would have effectively occurred at the time the User logged in.
 

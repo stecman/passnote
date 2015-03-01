@@ -53,6 +53,13 @@ class User extends \Phalcon\Mvc\Model
     protected $otpIv;
 
     /**
+     * Salt for the OTP encryption key derivation
+     *
+     * @var string
+     */
+    protected $otpSalt;
+
+    /**
      * Session key
      *
      * Random token that can be changed to invalidate sessions.
@@ -69,6 +76,20 @@ class User extends \Phalcon\Mvc\Model
      * @var string
      */
     protected $accountKeyPhrase;
+
+    /**
+     * KDF salt for $this->accountKeyPhrase
+     *
+     * @var string
+     */
+    protected $accountKeyPhraseSalt;
+
+    /**
+     * KDF iterations for $this->accountKeyPhrase
+     *
+     * @var int
+     */
+    protected $accountKeyPhraseIterations;
 
     /**
      * IV for encrypted accountKeyPhrase
@@ -163,9 +184,13 @@ class User extends \Phalcon\Mvc\Model
 
     public function setOtpKey($key, $password)
     {
-        $crypt = new \Stecman\Passnote\Encryptor();
+        $crypt = $this->getDI()->get('encryptor');
+
         $this->otpIv = $crypt->genIv();
-        $this->otpKey = $crypt->encrypt($key, $password, $this->otpIv);
+        $this->otpSalt = openssl_random_pseudo_bytes(32);
+        $derivedKey = $crypt->deriveKey($password, $this->otpSalt, $crypt->getKeySize());
+
+        $this->otpKey = $crypt->encrypt($key, $derivedKey, $this->otpIv);
     }
 
     /**
@@ -177,8 +202,10 @@ class User extends \Phalcon\Mvc\Model
     public function getOtpKey($password)
     {
         if ($this->otpKey) {
-            $crypt = new \Stecman\Passnote\Encryptor();
-            return $crypt->decrypt($this->otpKey, $password, $this->otpIv);
+            $crypt = $this->getDI()->get('encryptor');
+            $derviedKey = $crypt->deriveKey($password, $this->otpSalt, $crypt->getKeySize());
+
+            return $crypt->decrypt($this->otpKey, $derviedKey, $this->otpIv);
         }
     }
 
@@ -188,8 +215,10 @@ class User extends \Phalcon\Mvc\Model
             throw new \RuntimeException('User does not have an OTP key');
         }
 
-        $crypt = new \Stecman\Passnote\Encryptor();
-        $otpKey = $crypt->decrypt($this->otpKey, $oldPassword, $this->otpIv);
+        $crypt = $this->getDI()->get('encryptor');
+        $oldDerivedKey = $crypt->deriveKey($oldPassword, $this->otpSalt, $crypt->getKeySize());
+
+        $otpKey = $crypt->decrypt($this->otpKey, $oldDerivedKey, $this->otpIv);
         $this->setOtpKey($otpKey, $newPassword);
     }
 
@@ -202,10 +231,14 @@ class User extends \Phalcon\Mvc\Model
      */
     public function getAccountKeyPassphrase($password)
     {
-        $crypt = new \Stecman\Passnote\Encryptor();
+        $crypt = $this->getDI()->get('encryptor');
 
         if (!$this->accountKeyPhrase) {
             throw new \RuntimeException('User does not have an account key passphrase set');
+        }
+
+        if ($this->accountKeyPhraseSalt) {
+            $password = $crypt->deriveKey($password, $this->accountKeyPhraseSalt, $crypt->getKeySize(), $this->accountKeyPhraseIterations);
         }
 
         return $crypt->decrypt($this->accountKeyPhrase, $password, $this->accountKeyIv);
@@ -237,16 +270,21 @@ class User extends \Phalcon\Mvc\Model
      * This method DOES NOT change the passphrase of the account key! It only changes the passphrase stored in
      * the user. To re-encrypt the account key with a new passphrase, use User::recryptAccountKey().
      *
-     * @param $password
-     * @return string - the new passphrase
+     * @param $password - password to encrypt the new Key passphrase with
+     * @return string - the new passphrase in plain text
      */
     public function dangerouslyRegenerateAccountKeyPassphrase($password)
     {
-        $crypt = new \Stecman\Passnote\Encryptor();
+        $crypt = $this->getDI()->get('encryptor');
 
-        $newPhrase = base64_encode(openssl_random_pseudo_bytes(48));
+        $this->accountKeyPhraseSalt = openssl_random_pseudo_bytes(32);
+        $this->accountKeyPhraseIterations = $crypt->getKdfIterations();
+        $derivedKey = $crypt->deriveKey($password, $this->accountKeyPhraseSalt, $crypt->getKeySize());
+
+
+        $newPhrase = $crypt->generateRandomBytesWithoutNulls(32);
         $this->accountKeyIv = $crypt->genIv();
-        $this->accountKeyPhrase = $crypt->encrypt($newPhrase, $password, $this->accountKeyIv);
+        $this->accountKeyPhrase = $crypt->encrypt($newPhrase, $derivedKey, $this->accountKeyIv);
 
         return $newPhrase;
     }

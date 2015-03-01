@@ -1,5 +1,7 @@
 <?php
 
+defined('APPLICATION_PATH') || define('APPLICATION_PATH', dirname(__DIR__));
+
 $config = [
     'database' => [
         'adapter'     => 'Mysql',
@@ -24,6 +26,11 @@ $config = [
     'object-renderers' => [
         '\Stecman\Passnote\Object\Renderer\PlainText',
         '\Stecman\Passnote\Object\Renderer\Markdown'
+    ],
+    'encryption' => [
+        'kdf' => [
+            'iterations' => 50000
+        ]
     ]
 ];
 

@@ -20,7 +20,7 @@ class AccountKeyService extends Component
 
     public function __construct()
     {
-        $this->encryptor = new Encryptor();
+        $this->encryptor = $this->getDi()->get('encryptor');
     }
 
     public function unlockAccountKeyForSession(\User $user, $accountPassword)
@@ -31,9 +31,14 @@ class AccountKeyService extends Component
 
     public function decryptObject(ReadableEncryptedContent $object)
     {
-        return $object->getContent(
-            $this->getPassphrase()
-        );
+        $passphrase = $this->getPassphrase();
+        $data = $object->getContent($passphrase);
+
+        if (!$object->isChecksumValid($data, $passphrase)) {
+            $this->flash->warning('<strong>Warning:</strong> Checksum did not match data');
+        }
+
+        return $data;
     }
 
     public function purgeSessionKey()
@@ -52,7 +57,7 @@ class AccountKeyService extends Component
         $iv = $this->encryptor->genIv();
         $encrypted = $this->encryptor->encrypt($plainText, $key, $iv);
 
-        $this->cookies->set(self::COOKIE_NAME_KEY, bin2hex($key), null, null, null, null, true);
+        $this->cookies->set(self::COOKIE_NAME_KEY, base64_encode($key), null, null, null, null, true);
         $this->session->set(self::SESSION_COOKIE_KEY_IV, $iv);
         $this->session->set(self::SESSION_ACCOUNT_KEY_CRYPTED, $encrypted);
     }
@@ -65,7 +70,7 @@ class AccountKeyService extends Component
 
         $plainText = $this->encryptor->decrypt(
             $this->session->get(self::SESSION_ACCOUNT_KEY_CRYPTED),
-            @hex2bin($this->cookies->get(self::COOKIE_NAME_KEY)),
+            @base64_decode($this->cookies->get(self::COOKIE_NAME_KEY)),
             $this->session->get(self::SESSION_COOKIE_KEY_IV)
         );
 

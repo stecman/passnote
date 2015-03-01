@@ -21,13 +21,6 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
      */
     public $object_id;
 
-    /**
-     * SHA1 hash of the unencrypted content
-     *
-     * @var string
-     */
-    public $checksum;
-
     public function initialize()
     {
         $this->useDynamicUpdate(true);
@@ -60,10 +53,15 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
         $this->content = $raw;
     }
 
-    public function setEncryptionKey($key, $iv)
+    public function setEncryptedChecksum($raw)
     {
-        $this->encryptionKey = $key;
-        $this->encryptionKeyIv = $iv;
+        $this->checksum = $raw;
+    }
+
+    public function setEncryptedSessionKey($key, $iv)
+    {
+        $this->sessionKey = $key;
+        $this->sessionKeyIv = $iv;
     }
 
     /**
@@ -120,6 +118,14 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
             'current_version_id' => $this->id,
             'object_id' => $this->object_id
         ])->getFirst();
+    }
+
+    /**
+     * @return \Stecman\Passnote\Encryptor
+     */
+    protected function getEncryptor()
+    {
+        return $this->getDI()->get('encryptor');
     }
 
 }

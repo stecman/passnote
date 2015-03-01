@@ -1,9 +1,9 @@
 <?php
 
-use Phalcon\DI\FactoryDefault;
-use Phalcon\Mvc\View;
-use Phalcon\Mvc\Url as UrlResolver;
 use Phalcon\Db\Adapter\Pdo\Mysql as DbAdapter;
+use Phalcon\DI\FactoryDefault;
+use Phalcon\Mvc\Url as UrlResolver;
+use Phalcon\Mvc\View;
 use Phalcon\Mvc\View\Engine\Volt as VoltEngine;
 use Phalcon\Session\Adapter\Files as SessionAdapter;
 
@@ -13,6 +13,17 @@ use Phalcon\Session\Adapter\Files as SessionAdapter;
 if (!isset($di)) {
     $di = new FactoryDefault();
 }
+
+\Phalcon\DI::setDefault($di);
+
+/**
+ * Make the config accessible across the application
+ */
+$di->set('encryptor', function() use ($config) {
+    return new \Stecman\Passnote\Encryptor(
+        $config['encryption']['kdf']['iterations']
+    );
+}, true);
 
 /**
  * Raven PHP - logger for Sentry

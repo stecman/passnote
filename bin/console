@@ -117,8 +117,15 @@ class ConsoleTask extends BaseTask
     {
         if ($object->getKeyId() === $this->user->accountKey_id) {
             $content = $object->getContent($this->accountKeyPassphrase);
+            $checksumValid = $object->isChecksumValid($content, $this->accountKeyPassphrase);
         } else {
             echo "Sorry, non-account key objects not implemented here yet\n";
+            die();
+        }
+
+        if (!$checksumValid) {
+            echo "WARNING: The checksum of this record does not match the checksum of the decrypted content\n";
+            $this->promptInput('Press enter to continue: ');
         }
 
         $format = <<<EOD

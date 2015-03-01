@@ -4,7 +4,7 @@ use Phalcon\DI\FactoryDefault\CLI as CliDI;
 
 if (PHP_SAPI !== 'cli') die('This script is for CLI use only');
 
-defined('APPLICATION_PATH') || define('APPLICATION_PATH', realpath(dirname(__DIR__)));
+defined('APPLICATION_PATH') || define('APPLICATION_PATH', dirname(__DIR__));
 
 // Error handling
 error_reporting(E_ALL);
