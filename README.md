@@ -39,7 +39,7 @@ Passnote is still in development and not all core features are implemented yet.
 
 * Account settings: managing password and keys
 * Unlocking objects that use a key other than a user's account key (forms required)
-* Deleting and/or archiving objects
+* Archiving objects (instead of just deleting)
 
 **Planned functionality:**
 

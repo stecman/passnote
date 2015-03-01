@@ -36,6 +36,7 @@
 	{% block precontent %}{% endblock %}
 
 	<div class="container sch-container">
+		{{ flashSession.output() }}
 		{% block content %}
 			<p>Please override the content block.</p>
 		{% endblock %}

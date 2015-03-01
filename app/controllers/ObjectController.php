@@ -12,7 +12,7 @@ class ObjectController extends ControllerBase
 
     public function indexAction($id)
     {
-        $object = $this->getObjectWithId($id);
+        $object = $this->getObjectById($id);
 
         if ($object) {
             $content = $this->decryptContent($object);
@@ -33,7 +33,7 @@ class ObjectController extends ControllerBase
 
     public function versionsAction($id)
     {
-        $object = $this->getObjectWithId($id);
+        $object = $this->getObjectById($id);
 
         if ($object) {
             $versions = [];
@@ -93,7 +93,7 @@ class ObjectController extends ControllerBase
 
     public function editAction($id)
     {
-        $object = $this->getObjectWithId($id);
+        $object = $this->getObjectById($id);
         $form = new ObjectForm(null, Security::getCurrentUser());
 
         if ($object) {
@@ -102,7 +102,6 @@ class ObjectController extends ControllerBase
             $form->setEntity($object);
             $this->view->setVar('object', $object);
         }
-
 
         $this->view->setVar('form', $form);
 
@@ -113,10 +112,28 @@ class ObjectController extends ControllerBase
             }
 
             $savedObject = $form->handleSubmit();
+            $this->response->redirect( self::getObjectUrl($savedObject) );
+        }
+    }
 
-            if (!$object) {
-                $this->response->redirect( self::getObjectUrl($savedObject) );
+    public function deleteAction($id)
+    {
+        $object = $this->getObjectById($id);
+        $this->view->setVar('object', $object);
+
+        if (!$object) {
+            return $this->handleAs404('Object not found');
+        }
+
+        if ($this->request->isPost()) {
+            if (!$this->security->checkToken()) {
+                $this->flash->error('Invalid security token. Please try submitting the form again.');
+                return;
             }
+
+            $object->delete();
+            $this->flashSession->success("Deleted object $id");
+            $this->response->redirect('');
         }
     }
 
@@ -136,7 +153,7 @@ class ObjectController extends ControllerBase
      * @param $id
      * @return \Object
      */
-    protected function getObjectWithId($id)
+    protected function getObjectById($id)
     {
         return Object::findFirst([
             'id = :id: AND user_id = :user_id:',

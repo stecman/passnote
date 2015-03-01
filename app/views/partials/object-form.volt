@@ -33,4 +33,7 @@
 
 	<input type="submit" value="Save">
 
+	{% if object is defined %}
+		<a href="/object/{{ object.id | e }}/delete" class="button-delete link-danger">Delete</a>
+	{% endif %}
 </form>

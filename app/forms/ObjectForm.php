@@ -77,7 +77,7 @@ class ObjectForm extends \Phalcon\Forms\Form
 
         $object->save();
 
-        $this->flash->success('Object saved');
+        $this->flashSession->success('Object saved');
 
         return $object;
     }

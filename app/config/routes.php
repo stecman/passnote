@@ -15,6 +15,12 @@ $router->add('/object/([0-9]+)/versions/([0-9]+)', [
     'versionId' => 2,
 ]);
 
+$router->add('/object/([0-9]+)/delete/([0-9]+)', [
+    'controller' => 'object',
+    'action' => 'delete',
+    'objectId' => 1,
+    'versionId' => 2,
+]);
 $router->add('/object/([0-9]+)', [
     'controller' => 'object',
     'action' => 'index',

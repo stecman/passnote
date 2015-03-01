@@ -193,13 +193,18 @@ $di->set('dispatcher', function() use ($di) {
 
 
 //Register the flash service with custom CSS classes
-$di->set('flash', function(){
-    $flash = new \Phalcon\Flash\Direct(array(
-        'error' => 'alert alert-error',
-        'success' => 'alert alert-success',
-        'notice' => 'alert alert-info',
-        'warning' => 'alert alert-warning',
-        'plain' => 'alert'
-    ));
-    return $flash;
-});
+$flashConfig = [
+    'error' => 'alert alert-error',
+    'success' => 'alert alert-success',
+    'notice' => 'alert alert-info',
+    'warning' => 'alert alert-warning',
+    'plain' => 'alert'
+];
+
+$di->set('flash', function() use ($flashConfig) {
+    return new \Phalcon\Flash\Direct($flashConfig);
+}, true);
+
+$di->set('flashSession', function() use ($flashConfig) {
+    return new \Phalcon\Flash\Session($flashConfig);
+}, true);
