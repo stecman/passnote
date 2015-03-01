@@ -115,8 +115,12 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
     protected function saveVersion()
     {
         $previous = self::findFirst($this->id);
-        $version = ObjectVersion::versionFromObject($previous);
-        $version->create();
+
+        // Prevent Phalcon from going into an infinite beforeUpdate loop
+        if ($previous->content !== $this->content) {
+            $version = ObjectVersion::versionFromObject($previous);
+            $version->create();
+        }
     }
 
     /**
