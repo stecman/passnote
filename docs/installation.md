@@ -26,6 +26,9 @@ or
 
     # Login and run the query "CREATE DATABASE passnote", then:
     mysql -u root -p passnote < docs/mysql/schema.sql
+    
+    # Once database access is configured (below), apply the incremental schema updates:
+    ./bin/task.php migrate run
 
 
 ## Configuring

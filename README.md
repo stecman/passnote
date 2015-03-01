@@ -25,6 +25,12 @@ Additionally, to build and develop the interface components, you'll need:
 
 To build the CSS, you'll need to run `make less` in the project root.
 
+## Updating
+
+To update an existing install, pull down the latest code from master and run any database updates:
+
+    ./bin/task.php migrate run
+
 ## Road map
 
 Passnote is still in development and not all core features are implemented yet.
