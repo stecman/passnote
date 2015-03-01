@@ -27,7 +27,7 @@
 	</div>
 
 	<div class="form-group">
-		<label for="key_id">Encrpytion Key</label>
+		<label for="key_id">Encryption Key</label>
 		{{ form.render('key_id') }}
 	</div>
 
@@ -36,4 +36,5 @@
 	{% if object is defined %}
 		<a href="/object/{{ object.id | e }}/delete" class="button-delete link-danger">Delete</a>
 	{% endif %}
+
 </form>
