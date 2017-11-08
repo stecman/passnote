@@ -71,6 +71,7 @@ class AuthController extends ControllerBase
         ]);
 
         // Sleep for 1-500ms
+        // This won't do a whole lot to stop timing attacks as the randomness averages out over a lot of requests
         usleep(mt_rand(1000, 500000));
 
         if ($user && $user->validatePassword($data['password'])) {
@@ -94,8 +95,9 @@ class AuthController extends ControllerBase
             session_regenerate_id();
             $this->response->redirect('');
         } else {
-            // Keep timing
-            $this->security->hash(openssl_random_pseudo_bytes(12));
+            // Try to do roughly the same amount of work when a user wasn't found
+            // This won't do much to thwart timing attacks, but it reduces the difference between found and missing user
+            $this->security->hash($data['password']);
             $this->flash->error('Incorrect login details');
         }
     }
