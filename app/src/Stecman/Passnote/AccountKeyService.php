@@ -53,7 +53,7 @@ class AccountKeyService extends Component
 
     protected function setPassphrase($plainText)
     {
-        $key = openssl_random_pseudo_bytes(32);
+        $key = openssl_random_pseudo_bytes($this->encryptor->getKeySize());
         $iv = $this->encryptor->genIv();
         $encrypted = $this->encryptor->encrypt($plainText, $key, $iv);
 
