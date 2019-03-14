@@ -1,8 +1,5 @@
 <?php
 
-
-use Phalcon\Mvc\Model\Validator\Email as Email;
-
 class User extends \Phalcon\Mvc\Model
 {
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
@@ -129,14 +126,12 @@ class User extends \Phalcon\Mvc\Model
      */
     public function validation()
     {
-        $this->validate(
-            new Email(
-                array(
-                    "field"    => "email",
-                    "required" => true,
-                )
-            )
+        $validator = new \Phalcon\Validation();
+        $validator->add(
+            'email',
+            new Phalcon\Validation\Validator\Email()
         );
+
         if ($this->validationHasFailed() == true) {
             return false;
         }
@@ -164,7 +159,7 @@ class User extends \Phalcon\Mvc\Model
             'reusable' => true
         ]);
 
-        $this->hasMany('id', 'Object', 'user_id', [
+        $this->hasMany('id', 'StoredObject', 'user_id', [
             'alias' => 'Objects',
             'reusable' => true
         ]);
@@ -297,7 +292,7 @@ class User extends \Phalcon\Mvc\Model
      */
     public function changePassword($oldPassword, $newPassword)
     {
-        $this->setPassword($newPassword);
+        $this->dangerouslySetPassword($newPassword);
         $this->recryptOtpKey($oldPassword, $newPassword);
         $this->recryptAccountKey($oldPassword, $newPassword);
         $this->regenerateSessionKey();
@@ -330,14 +325,17 @@ class User extends \Phalcon\Mvc\Model
     }
 
     /**
-     * Change the user's password
+     * Change the user's password without updating encrypted keys
      *
-     * @param $newPassword - plain text
+     * This should only be used when initially creating a user account.
+     * Use changePassword() to set the password on an account that already exists.
+     *
+     * @param $password - plain text
      */
-    public function setPassword($newPassword)
+    public function dangerouslySetPassword($password)
     {
         $security = new \Phalcon\Security();
-        $this->password = $security->hash($newPassword);
+        $this->password = $security->hash($password);
 
         // Invalidate sessions on this account
         $this->regenerateSessionKey();

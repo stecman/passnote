@@ -86,7 +86,7 @@ class ConsoleTask extends BaseTask
     {
         $search = trim($search);
 
-        $query = Object::query()
+        $query = StoredObject::query()
             ->limit(10)
             ->orderBy('created DESC')
             ->where('user_id = :user_id: AND parent_id IS NULL', [
@@ -113,7 +113,7 @@ class ConsoleTask extends BaseTask
     /**
      * Decrypt and show the contents of an object
      */
-    protected function showObject(Object $object)
+    protected function showObject(StoredObject $object)
     {
         if ($object->getKeyId() === $this->user->accountKey_id) {
             $content = $object->getContent($this->accountKeyPassphrase);

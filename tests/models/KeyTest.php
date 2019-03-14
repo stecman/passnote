@@ -74,7 +74,7 @@ class KeyTest extends PHPUnit_Framework_TestCase
      */
     public function testExceedMaxMessageLength()
     {
-        $key = Key::generate('smith', 386);
+        $key = Key::generate('smith', 768);
         $key->encrypt(openssl_random_pseudo_bytes($key->getMaxMessageSize() + 1));
     }
 }

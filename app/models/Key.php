@@ -194,7 +194,7 @@ class Key extends \Phalcon\Mvc\Model
     }
 
     /**
-     * Put a private key resource in a Key object
+     * Serialise a private key resource onto this Key object
      *
      * @param Key $key
      * @param $privateKey
@@ -254,7 +254,8 @@ class Key extends \Phalcon\Mvc\Model
             'digest_alg' => 'sha512',
             'private_key_bits' => (int) $bits,
             'private_key_type' => OPENSSL_KEYTYPE_RSA,
-            'encrypt_key' => true
+            'encrypt_key' => true,
+            'encrypt_key_cipher' => OPENSSL_CIPHER_AES_256_CBC,
         ]);
 
         return $privateKey;

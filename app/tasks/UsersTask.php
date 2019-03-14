@@ -31,7 +31,7 @@ class UsersTask extends BaseTask
 
         $user = new User();
         $user->email = $email;
-        $user->setPassword($password);
+        $user->dangerouslySetPassword($password);
 
         // Create OTP key
         $otp = Seed::generate(40);

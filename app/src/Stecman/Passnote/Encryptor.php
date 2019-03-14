@@ -7,17 +7,18 @@ class Encryptor
     /**
      * @var string - one of the mcrypt cipher constants
      */
-    protected $cipher = MCRYPT_RIJNDAEL_256;
-
-    /**
-     * @var string - one of the MCRYPT_MODE_* constants
-     */
-    protected $mode = MCRYPT_MODE_CBC;
+    protected $cipher = 'aes-256-cbc';
 
     /**
      * @var int
      */
     protected $kdfIterations;
+
+    /**
+     * Options parameter for openssl encrypt/decrypt functions
+     * @var int
+     */
+    private $options = OPENSSL_RAW_DATA;
 
     public function __construct($kdfIterations)
     {
@@ -26,8 +27,7 @@ class Encryptor
 
     public function genIv()
     {
-        $iv_size = $this->getIvSize();
-        return mcrypt_create_iv($iv_size, MCRYPT_RAND);
+        return openssl_random_pseudo_bytes($this->getIvSize());
     }
 
     public function deriveKey($password, $salt, $keyLength, $iterations = null)
@@ -48,12 +48,12 @@ class Encryptor
 
     public function encrypt($data, $key, $iv)
     {
-        return mcrypt_encrypt($this->getCipher(), $key, $data, $this->getMcryptMode(), $iv);
+        return openssl_encrypt($data, $this->getCipher(), $key, $this->options, $iv);
     }
 
     public function decrypt($data, $key, $iv)
     {
-        $value = mcrypt_decrypt($this->getCipher(), $key, $data, $this->getMcryptMode(), $iv);
+        $value = openssl_decrypt($data, $this->getCipher(), $key, $this->options, $iv);
 
         // Strip null padding bytes
         return rtrim($value, "\0");
@@ -61,12 +61,14 @@ class Encryptor
 
     public function getIvSize()
     {
-        return mcrypt_get_iv_size($this->getCipher(), $this->getMcryptMode());
+        return openssl_cipher_iv_length($this->getCipher());
     }
 
     public function getKeySize()
     {
-        return mcrypt_get_key_size($this->getCipher(), $this->getMcryptMode());
+        // Return a roughly the right size key (maybe be larger than necessary in some cases)
+        // This exists as it used to be handled by an mcrypt function
+        return openssl_cipher_iv_length($this->getCipher()) * 2;
     }
 
     /**
@@ -92,10 +94,5 @@ class Encryptor
     protected function getCipher()
     {
         return $this->cipher;
-    }
-
-    protected function getMcryptMode()
-    {
-        return $this->mode;
     }
 }

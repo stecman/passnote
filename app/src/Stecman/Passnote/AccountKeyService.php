@@ -53,11 +53,11 @@ class AccountKeyService extends Component
 
     protected function setPassphrase($plainText)
     {
-        $key = openssl_random_pseudo_bytes(32);
+        $key = openssl_random_pseudo_bytes($this->encryptor->getKeySize());
         $iv = $this->encryptor->genIv();
         $encrypted = $this->encryptor->encrypt($plainText, $key, $iv);
 
-        $this->cookies->set(self::COOKIE_NAME_KEY, base64_encode($key), null, null, null, null, true);
+        $this->cookies->set(self::COOKIE_NAME_KEY, base64_encode($key), 0, '/', !DEV_MODE, null, true);
         $this->session->set(self::SESSION_COOKIE_KEY_IV, $iv);
         $this->session->set(self::SESSION_ACCOUNT_KEY_CRYPTED, $encrypted);
     }
@@ -68,9 +68,13 @@ class AccountKeyService extends Component
             throw new \RuntimeException('Account key is missing from the session');
         }
 
+        if (!$this->cookies->has(self::COOKIE_NAME_KEY)) {
+            throw new \RuntimeException('Session key cookie (ace) is missing. Unable to decrypt.');
+        }
+
         $plainText = $this->encryptor->decrypt(
             $this->session->get(self::SESSION_ACCOUNT_KEY_CRYPTED),
-            @base64_decode($this->cookies->get(self::COOKIE_NAME_KEY)),
+            base64_decode($this->cookies->get(self::COOKIE_NAME_KEY)->getValue()),
             $this->session->get(self::SESSION_COOKIE_KEY_IV)
         );
 

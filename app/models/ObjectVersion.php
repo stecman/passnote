@@ -8,6 +8,7 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
     use \Stecman\Passnote\Object\ReadableEncryptedContentTrait;
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
     use \Stecman\Passnote\Object\FormatPropertyTrait;
+    use \Stecman\Passnote\Object\HasUuidTrait;
 
     const OLDER_VERSION = 'older';
     const NEWER_VERSION = 'newer';
@@ -28,21 +29,28 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
             'exceptionOnFailedSave' => true
         ]);
 
-        $this->belongsTo('object_id', 'Object', 'id', [
+        $this->belongsTo('object_id', 'StoredObject', 'id', [
             'alias' => 'Master'
         ]);
     }
 
     /**
-     * @param Object $object
+     * @param StoredObject $object
      * @return ObjectVersion
      */
-    public static function versionFromObject(\Object $object)
+    public static function versionFromObject(\StoredObject $object)
     {
         $version = new ObjectVersion();
 
+        // Metadata
         $version->master = $object;
         $version->created = $object->getDateCreated();
+
+        // Inherit UUID from source
+        // The source gets a new UUID when it's saved
+        $version->uuid = $object->uuid;
+
+        // Copy payload of object
         $object->copyStateToVersion($version);
 
         return $version;
@@ -65,7 +73,7 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
     }
 
     /**
-     * @return Object
+     * @return StoredObject
      */
     public function getMaster()
     {
@@ -92,7 +100,7 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
      * Get a version of the same master object, relative to this version
      *
      * @param $relativeAge - one of ObjectVersion::NEWER_VERSION or ObjectVersion::OLDER_VERSION
-     * @return Object
+     * @return StoredObject
      * @throws RuntimeException
      */
     public function getSibling($relativeAge)

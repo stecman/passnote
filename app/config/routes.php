@@ -2,29 +2,29 @@
 
 $router = new \Phalcon\Mvc\Router(false);
 
-$router->add('/object/([0-9]+|new)/:action', [
+$router->add('/object/new/:action', [
     'controller' => 'object',
-    'id' => 1,
+    'uuid' => 'new',
+    'action' => 1,
+]);
+
+$router->add('/object/{uuid}/:action', [
+    'controller' => 'object',
     'action' => 2,
 ]);
 
-$router->add('/object/([0-9]+)/versions/([0-9]+)', [
+$router->add('/object/{objectUuid}/versions/{versionUuid}', [
     'controller' => 'object',
     'action' => 'showVersion',
-    'objectId' => 1,
-    'versionId' => 2,
 ]);
 
-$router->add('/object/([0-9]+)/delete/([0-9]+)', [
+$router->add('/object/{objectUuid}/delete/{versionUuid}', [
     'controller' => 'object',
-    'action' => 'delete',
-    'objectId' => 1,
-    'versionId' => 2,
+    'action' => 'delete'
 ]);
-$router->add('/object/([0-9]+)', [
+$router->add('/object/{uuid}', [
     'controller' => 'object',
     'action' => 'index',
-    'id' => 1,
 ]);
 
 $router->add('/auth/:action', [

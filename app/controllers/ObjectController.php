@@ -5,14 +5,14 @@ use Stecman\Passnote\Object\ReadableEncryptedContentTrait;
 
 class ObjectController extends ControllerBase
 {
-    public static function getObjectUrl(Object $object)
+    public static function getObjectUrl(StoredObject $object)
     {
-        return 'object/' . $object->id;
+        return 'object/' . $object->getUuid();
     }
 
-    public function indexAction($id)
+    public function indexAction($uuid)
     {
-        $object = $this->getObjectById($id);
+        $object = $this->getObjectById($uuid);
 
         if ($object) {
             $content = $this->decryptContent($object);
@@ -31,9 +31,9 @@ class ObjectController extends ControllerBase
         echo $query;
     }
 
-    public function versionsAction($id)
+    public function versionsAction($uuid)
     {
-        $object = $this->getObjectById($id);
+        $object = $this->getObjectById($uuid);
 
         if ($object) {
             $versions = [];
@@ -65,18 +65,9 @@ class ObjectController extends ControllerBase
         }
     }
 
-    public function showVersionAction($objectId, $versionId)
+    public function showVersionAction($objectUuid, $versionUuid)
     {
-        $version = $this->modelsManager->executeQuery(
-            'SELECT ObjectVersion.* FROM ObjectVersion'
-            .' LEFT JOIN Object ON ObjectVersion.object_id = Object.id'
-            .' WHERE ObjectVersion.id = :version_id: AND ObjectVersion.object_id = :object_id: AND Object.user_id = :user_id:',
-            [
-                'version_id' => (int) $versionId,
-                'object_id' => (int) $objectId,
-                'user_id' => Security::getCurrentUserId()
-            ]
-        )->getFirst();
+        $version = $this->getObjectVersion($objectUuid, $versionUuid);
 
         if ($version) {
             $content = $this->decryptContent($version);
@@ -91,9 +82,9 @@ class ObjectController extends ControllerBase
         }
     }
 
-    public function editAction($id)
+    public function editAction($uuid)
     {
-        $object = $this->getObjectById($id);
+        $object = $this->getObjectById($uuid);
         $form = new ObjectForm(null, Security::getCurrentUser());
 
         if ($object) {
@@ -116,10 +107,16 @@ class ObjectController extends ControllerBase
         }
     }
 
-    public function deleteAction($id)
+    public function deleteAction($objectUuid, $versionUuid = null)
     {
-        $object = $this->getObjectById($id);
+        if ($versionUuid) {
+            $object = $this->getObjectVersion($objectUuid, $versionUuid);
+        } else {
+            $object = $this->getObjectById($objectUuid);
+        }
+
         $this->view->setVar('object', $object);
+        $this->view->setVar('isVersion', $object instanceof ObjectVersion);
 
         if (!$object) {
             return $this->handleAs404('Object not found');
@@ -132,7 +129,7 @@ class ObjectController extends ControllerBase
             }
 
             $object->delete();
-            $this->flashSession->success("Deleted object $id");
+            $this->flashSession->success("Deleted object $objectUuid");
             $this->response->redirect('');
         }
     }
@@ -150,15 +147,15 @@ class ObjectController extends ControllerBase
     }
 
     /**
-     * @param $id
-     * @return \Object
+     * @param string $uuid
+     * @return \StoredObject
      */
-    protected function getObjectById($id)
+    protected function getObjectById($uuid)
     {
-        return Object::findFirst([
-            'id = :id: AND user_id = :user_id:',
+        return StoredObject::findFirst([
+            'uuid = :uuid: AND user_id = :user_id:',
             'bind' => [
-                'id' => (int) $id,
+                'uuid' => $uuid,
                 'user_id' => Security::getCurrentUserId()
             ]
         ]);
@@ -171,4 +168,23 @@ class ObjectController extends ControllerBase
         return $diff;
     }
 
+    /**
+     * Fetch an object version from the database
+     *
+     * @param string $objectUuid
+     * @param string $versionUuid
+     * @return ObjectVersion|null
+     */
+    protected function getObjectVersion($objectUuid, $versionUuid) {
+        return $this->modelsManager->executeQuery(
+            'SELECT ObjectVersion.* FROM ObjectVersion'
+            .' LEFT JOIN StoredObject Object ON ObjectVersion.object_id = Object.id'
+            .' WHERE ObjectVersion.uuid = :version_uuid: AND Object.uuid = :object_uuid: AND Object.user_id = :user_id:',
+            [
+                'version_uuid' => $versionUuid,
+                'object_uuid' => $objectUuid,
+                'user_id' => Security::getCurrentUserId()
+            ]
+        )->getFirst();
+    }
 }

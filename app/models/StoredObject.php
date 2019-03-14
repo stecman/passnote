@@ -4,11 +4,12 @@
 use Stecman\Passnote\Object\ReadableEncryptedContent;
 use Stecman\Passnote\Object\Renderable;
 
-class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Renderable
+class StoredObject extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Renderable
 {
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
     use \Stecman\Passnote\Object\FormatPropertyTrait;
     use \Stecman\Passnote\Object\WritableEncryptedContentTrait;
+    use \Stecman\Passnote\Object\HasUuidTrait;
 
     public $id;
      
@@ -49,8 +50,17 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
      */
     public $parent_id;
 
+    /**
+     * Internal state for saving without a version
+     *
+     * @var bool
+     */
+    private $shouldSaveVersion = true;
+
     public function initialize()
     {
+        $this->setSource('object');
+
         $this->useDynamicUpdate(true);
         $this->setup([
             'exceptionOnFailedSave' => true
@@ -98,15 +108,34 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
         $version->setEncryptedChecksum($this->checksum);
         $version->setFormat($this->format);
 
+        // Prevent legacy objects without checksums failing validation when saving
+        // At this point there's no way to inspect the object contents, so this is the best we can do
+        if ($this->checksum == '') {
+            $version->setEncryptedChecksum('[missing]');
+        }
+
         return $version;
+    }
+
+    protected function beforeCreate()
+    {
+        // Ensure the object has a UUID for writing to the database
+        $this->generateNewUuid();
     }
 
     protected function beforeUpdate()
     {
-        $this->saveVersion();
+        if ($this->shouldSaveVersion) {
 
-        // Update the created date, since this is effectively a new object now (the old one is the version)
-        $this->created = date('Y-m-d H:i:s');
+            // Save the old
+            $this->saveVersion();
+
+            // Change the UUID as the data is (assumed to be) changing
+            $this->generateNewUuid();
+
+            // Update the created date, since this is effectively a new object now (the old one is the version)
+            $this->created = date('Y-m-d H:i:s');
+        }
     }
 
     /**
@@ -153,5 +182,19 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
     protected function getEncryptor()
     {
         return $this->getDI()->get('encryptor');
+    }
+
+    /**
+     * Save in-place without creating a version
+     *
+     * This is intended for use in migrations via reflection.
+     */
+    protected function saveWithoutVersion()
+    {
+        $this->shouldSaveVersion = false;
+
+        $this->save();
+
+        $this->shouldSaveVersion = true;
     }
 }

@@ -12,8 +12,8 @@
 			{% if loop.first %}
 				(current version)
 			{% else %}
-				<a class="obj-raw-action danger" href="/object/{{ object.id | escape_attr }}/delete/{{ version.id | escape_attr }}">Delete</a>
-				{#<a class="obj-raw-action" href="/object/{{ object.id | escape_attr }}/versions/{{ version.id | escape_attr }}">View</a>#}
+				<a class="obj-raw-action danger" href="/object/{{ object.getUuid() | escape_attr }}/delete/{{ version.getUuid() | escape_attr }}">Delete</a>
+				{#<a class="obj-raw-action" href="/object/{{ object.getUuid() | escape_attr }}/versions/{{ version.getUuid() | escape_attr }}">View</a>#}
 			{% endif %}
 		</div>
 	</div>

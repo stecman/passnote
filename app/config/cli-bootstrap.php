@@ -17,12 +17,6 @@ if (file_exists($autoload = __DIR__ . '/../../vendor/autoload.php')) {
     die("Composer vendors are not installed. Run `composer install`\n");
 }
 
-if (class_exists('Whoops\Run')) {
-    $whoops = new Whoops\Run();
-    $whoops->pushHandler(new Whoops\Handler\PlainTextHandler());
-    $whoops->register();
-}
-
 // Load the configuration file (if any)
 if(is_readable(APPLICATION_PATH . '/config/config.php')) {
     $config = include APPLICATION_PATH . '/config/config.php';
