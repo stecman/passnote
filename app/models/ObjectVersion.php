@@ -8,6 +8,7 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
     use \Stecman\Passnote\Object\ReadableEncryptedContentTrait;
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
     use \Stecman\Passnote\Object\FormatPropertyTrait;
+    use \Stecman\Passnote\Object\HasUuidTrait;
 
     const OLDER_VERSION = 'older';
     const NEWER_VERSION = 'newer';
@@ -41,8 +42,15 @@ class ObjectVersion extends \Phalcon\Mvc\Model implements ReadableEncryptedConte
     {
         $version = new ObjectVersion();
 
+        // Metadata
         $version->master = $object;
         $version->created = $object->getDateCreated();
+
+        // Inherit UUID from source
+        // The source gets a new UUID when it's saved
+        $version->uuid = $object->uuid;
+
+        // Copy payload of object
         $object->copyStateToVersion($version);
 
         return $version;

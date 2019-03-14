@@ -5,12 +5,12 @@
 <div class="row h-clearfix">
 	<div class="col-md-6">
 	{% if prev_version %}
-			<a href="/object/{{ object.id }}/versions/{{ prev_version.id }}">&laquo; {{ prev_version.getDateCreated('j M Y, g:ia') }}</a>
+			<a href="/object/{{ object.getUuid() }}/versions/{{ prev_version.getUuid() }}">&laquo; {{ prev_version.getDateCreated('j M Y, g:ia') }}</a>
 		{% endif %}
 	</div>
 	<div class="col-md-6 text-right">
 		{% if next_version %}
-			<a href="/object/{{ object.id }}/versions/{{ next_version.id }}">{{ next_version.getDateCreated('j M Y, g:ia') }} &raquo;</a>
+			<a href="/object/{{ object.getUuid() }}/versions/{{ next_version.getUuid() }}">{{ next_version.getDateCreated('j M Y, g:ia') }} &raquo;</a>
 		{% endif %}
 	</div>
 </div>

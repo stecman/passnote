@@ -9,6 +9,7 @@ class StoredObject extends \Phalcon\Mvc\Model implements ReadableEncryptedConten
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
     use \Stecman\Passnote\Object\FormatPropertyTrait;
     use \Stecman\Passnote\Object\WritableEncryptedContentTrait;
+    use \Stecman\Passnote\Object\HasUuidTrait;
 
     public $id;
      
@@ -103,9 +104,19 @@ class StoredObject extends \Phalcon\Mvc\Model implements ReadableEncryptedConten
         return $version;
     }
 
+    protected function beforeCreate()
+    {
+        // Ensure the object has a UUID for writing to the database
+        $this->generateNewUuid();
+    }
+
     protected function beforeUpdate()
     {
+        // Save the old
         $this->saveVersion();
+
+        // Change the UUID as the data is (assumed to be) changing
+        $this->generateNewUuid();
 
         // Update the created date, since this is effectively a new object now (the old one is the version)
         $this->created = date('Y-m-d H:i:s');
