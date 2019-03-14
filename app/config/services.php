@@ -30,18 +30,18 @@ $di->set('encryptor', function() use ($config) {
  */
 $di->set('raven', function() use ($config) {
     if ($url = $config->logging->ravenUrl) {
-
+        $raven = new Raven_Client($url);
+        return $raven;
     } else {
-
+        return null;
     }
-    $raven = new Raven_Client($url);
-    return $raven;
 });
 
 /**
  * Error handling
  *
  * Dev mode is enabled when the environment variable DEV_MODE is set.
+ * When running from the command-line, PHP's default error handling is used
  */
 if (PHP_SAPI !== 'cli') {
     if (DEV_MODE) {
@@ -68,7 +68,10 @@ $di->set('url', function () use ($config) {
     return $url;
 }, true);
 
-$di->set('router', function () {
+/**
+ * Routes from external file
+ */
+$di->set('router', function () use ($di) {
     return require __DIR__ . '/routes.php';
 });
 

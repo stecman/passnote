@@ -4,7 +4,7 @@
 use Stecman\Passnote\Object\ReadableEncryptedContent;
 use Stecman\Passnote\Object\Renderable;
 
-class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Renderable
+class StoredObject extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Renderable
 {
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
     use \Stecman\Passnote\Object\FormatPropertyTrait;
@@ -51,6 +51,8 @@ class Object extends \Phalcon\Mvc\Model implements ReadableEncryptedContent, Ren
 
     public function initialize()
     {
+        $this->setSource('object');
+
         $this->useDynamicUpdate(true);
         $this->setup([
             'exceptionOnFailedSave' => true

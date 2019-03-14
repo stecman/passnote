@@ -6,14 +6,14 @@ class ObjectTest extends PHPUnit_Framework_TestCase
     const KEY_PASSPHRASE = 'walrus5000';
 
     /**
-     * @var \Object
+     * @var \StoredObject
      */
     protected $object;
 
     protected function setUp()
     {
-        $this->object = new Object();
-        $this->object->key = Key::generate(self::KEY_PASSPHRASE, 386);
+        $this->object = new StoredObject();
+        $this->object->key = Key::generate(self::KEY_PASSPHRASE, 512);
     }
 
     public function testSetGetContent()

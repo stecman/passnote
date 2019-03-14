@@ -6,7 +6,7 @@
 					
 					<div class="sch-search-cont">
 						<a href="/" class="sch-logo">△</a>
-						<input type="search" name="query" value="{{ request.getPost('query') | escape_attr }}" {% if search_autofocus is defined %}autofocus{% endif %}>
+						<input type="search" name="query" value="{{ request.getPost('query', 'escape_attr') }}" {% if search_autofocus is defined %}autofocus{% endif %}>
 					</div>
 
 					<div class="sch-submit-cont">

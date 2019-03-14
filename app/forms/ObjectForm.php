@@ -59,11 +59,11 @@ class ObjectForm extends \Phalcon\Forms\Form
     /**
      * Handle the form and return the saved object
      *
-     * @return Object
+     * @return StoredObject
      */
     public function handleSubmit()
     {
-        $object = $this->getEntity() ?: new Object();
+        $object = $this->getEntity() ?: new StoredObject();
 
         if ($object->key_id != $this->request->getPost('key_id')) {
             $object->key = Key::findFirst( (int) $this->request->getPost('key_id') );

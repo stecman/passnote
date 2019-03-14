@@ -1,8 +1,5 @@
 <?php
 
-
-use Phalcon\Mvc\Model\Validator\Email as Email;
-
 class User extends \Phalcon\Mvc\Model
 {
     use \Stecman\Phalcon\Model\Traits\CreationDateTrait;
@@ -129,14 +126,12 @@ class User extends \Phalcon\Mvc\Model
      */
     public function validation()
     {
-        $this->validate(
-            new Email(
-                array(
-                    "field"    => "email",
-                    "required" => true,
-                )
-            )
+        $validator = new \Phalcon\Validation();
+        $validator->add(
+            'email',
+            new Phalcon\Validation\Validator\Email()
         );
+
         if ($this->validationHasFailed() == true) {
             return false;
         }
@@ -164,7 +159,7 @@ class User extends \Phalcon\Mvc\Model
             'reusable' => true
         ]);
 
-        $this->hasMany('id', 'Object', 'user_id', [
+        $this->hasMany('id', 'StoredObject', 'user_id', [
             'alias' => 'Objects',
             'reusable' => true
         ]);

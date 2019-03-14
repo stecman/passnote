@@ -11,7 +11,7 @@
 			</p>
 		</a>
 		{% else %}
-			{% if search_term is defined %}
+			{% if search_term is defined and search_term %}
 				<p>No objects found matching <em>"{{ search_term }}"</em></p>
 			{% else %}
 				<p>No objects found</p>

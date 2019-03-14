@@ -5,7 +5,7 @@ use Stecman\Passnote\Object\ReadableEncryptedContentTrait;
 
 class ObjectController extends ControllerBase
 {
-    public static function getObjectUrl(Object $object)
+    public static function getObjectUrl(StoredObject $object)
     {
         return 'object/' . $object->id;
     }
@@ -69,7 +69,7 @@ class ObjectController extends ControllerBase
     {
         $version = $this->modelsManager->executeQuery(
             'SELECT ObjectVersion.* FROM ObjectVersion'
-            .' LEFT JOIN Object ON ObjectVersion.object_id = Object.id'
+            .' LEFT JOIN StoredObject Object ON ObjectVersion.object_id = Object.id'
             .' WHERE ObjectVersion.id = :version_id: AND ObjectVersion.object_id = :object_id: AND Object.user_id = :user_id:',
             [
                 'version_id' => (int) $versionId,
@@ -155,7 +155,7 @@ class ObjectController extends ControllerBase
      */
     protected function getObjectById($id)
     {
-        return Object::findFirst([
+        return StoredObject::findFirst([
             'id = :id: AND user_id = :user_id:',
             'bind' => [
                 'id' => (int) $id,

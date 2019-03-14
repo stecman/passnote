@@ -12,7 +12,7 @@ Passnote is a web application for storing secrets. It's not complete yet, but it
 
 * PHP >= 5.4 configured with `--with-openssl` (this is normal)
 * The PHP MCrypt extension
-* [Phalcon PHP](http://phalconphp.com/) >= 1.3.0
+* [Phalcon PHP](http://phalconphp.com/) >= 3.4.0
 * A database. The schema for MySQL is in `docs/mysql/schema.sql`, though Phalcon supports other databases
 * Composer
 * A web server with the document root set to the project's `public` directory and set up to pass unresolved requests through to `public/index.php`. The built-in PHP web sever can be used for development by running `php -S 127.0.0.1:8000` in the `public/` directory.

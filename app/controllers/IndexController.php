@@ -2,7 +2,6 @@
 
 class IndexController extends ControllerBase
 {
-
     public function indexAction()
     {
         $objects = $this->getObjectQuery();
@@ -27,7 +26,7 @@ class IndexController extends ControllerBase
     protected function getObjectQuery()
     {
         $query = $this->modelsManager->createBuilder();
-        $query->addFrom('Object');
+        $query->addFrom('StoredObject');
         $query->orderBy('created DESC');
         $query->where('user_id = :user_id: AND parent_id IS NULL', [
             'user_id' => Security::getCurrentUserId()
