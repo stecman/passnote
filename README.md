@@ -64,4 +64,4 @@ Passnote is designed to encrypt and manage data in a safer manner than storing y
 
 If you're serious about security though, you probably want to consider not using this project at all - it's just a toy and the security knowledge of the author is limited.
 
-¹ Objects in Passnote are encrypted using 256 bit AES (MCRYPT_RIJNDAEL_256 in CBC mode) with a random 32 byte passphrase for each object. The random passphrase of each object is stored encrypted using an RSA key selected by the user. Keys are are generated as 4096 bit by default. Remember that objects are only as safe as the password on the RSA key associated with them.
+¹ Objects in Passnote are encrypted using 256 bit AES in CBC mode with a random 32 byte passphrase for each object. The random passphrase of each object is stored encrypted using an RSA key selected by the user. Keys are are generated as 4096 bit by default. Remember that objects are only as safe as the password on the RSA key associated with them.

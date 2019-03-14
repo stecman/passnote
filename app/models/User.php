@@ -292,7 +292,7 @@ class User extends \Phalcon\Mvc\Model
      */
     public function changePassword($oldPassword, $newPassword)
     {
-        $this->setPassword($newPassword);
+        $this->dangerouslySetPassword($newPassword);
         $this->recryptOtpKey($oldPassword, $newPassword);
         $this->recryptAccountKey($oldPassword, $newPassword);
         $this->regenerateSessionKey();
@@ -325,14 +325,17 @@ class User extends \Phalcon\Mvc\Model
     }
 
     /**
-     * Change the user's password
+     * Change the user's password without updating encrypted keys
      *
-     * @param $newPassword - plain text
+     * This should only be used when initially creating a user account.
+     * Use changePassword() to set the password on an account that already exists.
+     *
+     * @param $password - plain text
      */
-    public function setPassword($newPassword)
+    public function dangerouslySetPassword($password)
     {
         $security = new \Phalcon\Security();
-        $this->password = $security->hash($newPassword);
+        $this->password = $security->hash($password);
 
         // Invalidate sessions on this account
         $this->regenerateSessionKey();

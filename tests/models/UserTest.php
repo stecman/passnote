@@ -8,7 +8,7 @@ class UserTest extends PHPUnit_Framework_TestCase
         $password = 'I am a cool password';
 
         $user = new User();
-        $user->setPassword($password);
+        $user->dangerouslySetPassword($password);
 
         $this->assertTrue($user->validatePassword($password));
     }

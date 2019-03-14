@@ -1,7 +1,12 @@
 <?php
 
+use Stecman\Passnote\Migration\McryptToOpensslMigration;
+
 class MigrateTask extends BaseTask
 {
+    /**
+     * Apply database schema patches
+     */
     public function runAction()
     {
         $this->updateSchemaTable();
@@ -9,6 +14,34 @@ class MigrateTask extends BaseTask
         foreach ($this->getUnappliedPatches() as $patchName) {
             echo "Applying patch '$patchName'\n";
             $this->applyPatch($patchName);
+        }
+    }
+
+    /**
+     * Migrate from non-standard mcrypt AES encryption to openssl
+     *
+     * See docs/upgrade-notes/
+     *
+     * @param string $email
+     */
+    public function mcrypt_opensslAction($email)
+    {
+        /** @var User $user */
+        $user = User::findFirst([
+            'email = :email:',
+            'bind' => [
+                'email' => $email
+            ]
+        ]);
+
+        if ($user) {
+            $password = $this->promptInput('Password: ', true);
+
+            $migration = new McryptToOpensslMigration($this->di, $user, $password);
+            $migration->run();
+
+        } else {
+            die("No user found for $email\n");
         }
     }
 
