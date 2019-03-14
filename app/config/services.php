@@ -106,13 +106,15 @@ $di->set('view', function () use ($config) {
 /**
  * View cache component
  */
-$di->set('viewCache', function() {
+$di->set('viewCache', function() use ($config) {
     $frontend = new \Phalcon\Cache\Frontend\Output();
 
     if (extension_loaded('apc')) {
         $cache = new \Phalcon\Cache\Backend\Apc($frontend);
+    } else if (extension_loaded('apcu')) {
+        $cache = new \Phalcon\Cache\Backend\Apcu($frontend);
     } else {
-        $cache = new \Phalcon\Cache\Backend\File($frontend);
+        $cache = new \Phalcon\Cache\Backend\File($frontend, $config['application']['cacheDir']);
     }
 
     return $cache;
