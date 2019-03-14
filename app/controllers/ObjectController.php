@@ -114,7 +114,9 @@ class ObjectController extends ControllerBase
         } else {
             $object = $this->getObjectById($objectUuid);
         }
+
         $this->view->setVar('object', $object);
+        $this->view->setVar('isVersion', $object instanceof ObjectVersion);
 
         if (!$object) {
             return $this->handleAs404('Object not found');
