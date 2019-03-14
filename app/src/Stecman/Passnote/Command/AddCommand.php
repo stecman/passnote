@@ -3,14 +3,11 @@
 namespace Stecman\Passnote\Command;
 
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
-use \Object;
-use \User;
+use User;
 
 class AddCommand extends Command
 {
@@ -67,7 +64,7 @@ class AddCommand extends Command
         }
 
         $user = $this->findUser($input->getArgument('user'));
-        
+
 		// Read any content from stdin (blocking)
 		$content = null;
 		if (!posix_isatty(STDIN)) {
@@ -109,9 +106,8 @@ class AddCommand extends Command
             throw new \RuntimeException('Content empty. Aborting.');
         }
 
-        
-        
-        $object = new Object();
+
+        $object = new \StoredObject();
         $object->key_id = $user->accountKey_id;
 
         $object->user = $user;

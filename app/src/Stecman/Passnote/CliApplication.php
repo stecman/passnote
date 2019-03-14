@@ -20,6 +20,7 @@ class CliApplication extends BaseApplication
         $commands = parent::getDefaultCommands();
 
         $commands[] = new Command\AddCommand();
+        $commands[] = new Command\ViewCommand();
 
         return $commands;
     }

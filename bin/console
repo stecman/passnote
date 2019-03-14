@@ -3,4 +3,5 @@
 
 require __DIR__ . '/../app/config/cli-bootstrap.php';
 
-
+$application = new Stecman\Passnote\CliApplication();
+$application->run();

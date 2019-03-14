@@ -1,14 +1,19 @@
-#!/usr/bin/env php
 <?php
 
-require __DIR__ . '/../app/config/cli-bootstrap.php';
-require __DIR__ . '/../app/tasks/BaseTask.php';
+namespace Stecman\Passnote\Command;
 
-class ConsoleTask extends BaseTask
+use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\QuestionHelper;
+use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
+
+class ViewCommand extends Command
 {
     /**
      * Logged in user
-     * @var User
+     * @var \User
      */
     protected $user;
 
@@ -18,20 +23,40 @@ class ConsoleTask extends BaseTask
      */
     protected $accountKeyPassphrase;
 
-    public function run()
+    protected function configure()
     {
-        $email = $this->promptInput('User: ');
+        $this
+            ->setName('view')
+            ->setDescription('Search and view objects')
+            ->addArgument(
+                'user',
+                InputArgument::OPTIONAL,
+                'Account name to push object to.'
+            );
+    }
 
-        /** @var User $user */
-        $user = User::findFirst([
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $email = trim($input->getArgument('user'));
+
+        // Prompting for user if not provided
+        if ($email === '') {
+            $question = new Question('User: ');
+            $email = $this->getQuestionHelper()->ask($input, $output, $question);
+        }
+
+        /** @var \User $user */
+        $user = \User::findFirst([
             'email = :email:',
             'bind' => [
                 'email' => $email
             ]
         ]);
-        
+
         if ($user) {
-            $password = $this->promptInput('Password: ', true);
+            $question = new Question('Password: ');
+            $question->setHidden(true);
+            $password = $this->getQuestionHelper()->ask($input, $output, $question);
 
             if (!$user->validatePassword( $password )) {
                 die("Password incorrect\n");
@@ -41,16 +66,17 @@ class ConsoleTask extends BaseTask
             $this->accountKeyPassphrase = $user->getAccountKeyPassphrase($password);
             unset($password);
 
-            $this->startConsole();
+            $this->startConsole($input, $output);
         } else {
             die("No user found for $email\n");
         }
     }
 
-    protected function startConsole()
+    protected function startConsole(InputInterface $input, OutputInterface $output)
     {
         while (true) {
-            $search = $this->promptInput('Search: ');
+            $question = new Question('Search: ');
+            $search = $this->getQuestionHelper()->ask($input, $output, $question);
 
             if ($search === null) {
                 exit(0);
@@ -69,7 +95,8 @@ class ConsoleTask extends BaseTask
                 echo sprintf("    [%d] %s\n", $index, $object->title);
             }
 
-            $selection = $this->promptInput("\nItem to display: ");
+            $question = new Question("\nItem to display: ");
+            $selection = $this->getQuestionHelper()->ask($input, $output, $question);
 
             if ($selection === null) {
                 continue;
@@ -86,7 +113,7 @@ class ConsoleTask extends BaseTask
     {
         $search = trim($search);
 
-        $query = Object::query()
+        $query = \StoredObject::query()
             ->limit(10)
             ->orderBy('created DESC')
             ->where('user_id = :user_id: AND parent_id IS NULL', [
@@ -113,7 +140,7 @@ class ConsoleTask extends BaseTask
     /**
      * Decrypt and show the contents of an object
      */
-    protected function showObject(Object $object)
+    protected function showObject(\StoredObject $object)
     {
         if ($object->getKeyId() === $this->user->accountKey_id) {
             $content = $object->getContent($this->accountKeyPassphrase);
@@ -121,11 +148,6 @@ class ConsoleTask extends BaseTask
         } else {
             echo "Sorry, non-account key objects not implemented here yet\n";
             die();
-        }
-
-        if (!$checksumValid) {
-            echo "WARNING: The checksum of this record does not match the checksum of the decrypted content\n";
-            $this->promptInput('Press enter to continue: ');
         }
 
         $format = <<<EOD
@@ -137,6 +159,12 @@ Last Modified: %s
 
 %s
 EOD;
+
+        // Append warning message to output if checksum doesn't match
+        if (!$checksumValid) {
+            $format = "WARNING: The checksum of this record does not match the checksum of the decrypted content\n\n" . $format;
+        }
+
         $this->display(
             sprintf(
                 $format,
@@ -174,8 +202,12 @@ EOD;
 
         proc_close($process);
     }
-}
 
-$console = new ConsoleTask();
-$console->setDi($di);
-$console->run();
+    /**
+     * @return QuestionHelper
+     */
+    protected function getQuestionHelper()
+    {
+        return new QuestionHelper();
+    }
+}
