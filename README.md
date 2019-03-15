@@ -1,6 +1,6 @@
 # **Passnote**: encrypted data store
 
-Passnote is a web application for storing secrets. It's not complete yet, but it's in a working state.
+Passnote is an application for storing secrets.
 
 ![Passnote screenshot](https://i.imgur.com/OpFPetu.png)
 
@@ -10,8 +10,7 @@ Passnote is a web application for storing secrets. It's not complete yet, but it
 
 [Step by step installation instructions can be found in docs/installation.md.](docs/installation.md) In general, to run Passnote you'll need:
 
-* PHP >= 5.4 configured with `--with-openssl` (this is normal)
-* The PHP MCrypt extension
+* PHP 7.0 configured with `--with-openssl` (this is normal)
 * [Phalcon PHP](http://phalconphp.com/) >= 3.4.0
 * A database. The schema for MySQL is in `docs/mysql/schema.sql`, though Phalcon supports other databases
 * Composer
@@ -21,7 +20,7 @@ Additionally, to build and develop the interface components, you'll need:
 
 * Node JS and NPM to run most of the interface toolkit
 * [LESS](http://lesscss.org/) compiler `lessc`
-* [Bower](http://bower.io/) to install Javascript and CSS dependencies: `bower`
+* [Bower](http://bower.io/) to install JavaScript and CSS dependencies: `bower`
 
 To build the CSS, you'll need to run `make less` in the project root.
 
@@ -31,14 +30,16 @@ To update an existing install, pull down the latest code from master and run any
 
     ./bin/task.php migrate run
 
+Also see [docs/upgrade-notes.md](docs/upgrade-notes.md) for any extra steps required.
+
 ## Road map
 
-Passnote is still in development and not all core features are implemented yet.
+Passnote is stable, but more features are planned:
 
 **Core functionality that still needs to be implemented:**
 
 * Account settings: managing password and keys
-* Unlocking objects that use a key other than a user's account key (forms required)
+* Unlocking objects that use a key other than a user's account key
 * Archiving objects (instead of just deleting)
 
 **Planned functionality:**
@@ -62,6 +63,6 @@ Passnote is designed to encrypt and manage data in a safer manner than storing y
     X-Frame-Options: DENY
     X-XSS-Protection: 1; mode=block
 
-If you're serious about security though, you probably want to consider not using this project at all - it's just a toy and the security knowledge of the author is limited.
+You probably want to consider not using this project other than as a Phalcon PHP demo - it's just a toy and the security knowledge of the author is limited.
 
-¹ Objects in Passnote are encrypted using 256 bit AES in CBC mode with a random 32 byte passphrase for each object. The random passphrase of each object is stored encrypted using an RSA key selected by the user. Keys are are generated as 4096 bit by default. Remember that objects are only as safe as the password on the RSA key associated with them.
+¹ Objects in Passnote are each encrypted using 256 bit AES in CBC mode with a random 32 byte key. The random key for of each object is encrypted using an RSA key and stored alongside the encrypted content. Generated RSA keys are 4096 bit by default. Remember that objects are only as safe as the password on the RSA key associated with them.
